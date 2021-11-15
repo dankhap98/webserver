@@ -63,43 +63,41 @@ void    Webserver::start()
     int rc;
     int end_server = FALSE;
     int close_conn;
-    
-    //do
-   while (end_server == FALSE)
-   {
-      memcpy(&(this->working_set), &(this->master_set), sizeof(this->master_set));
 
-      std::cout << "Waiting on select()...\n";
-      rc = select(this->max_sd + 1, &(this->working_set), NULL, NULL, &(this->timeout));
+    do
+    {
+        memcpy(&(this->working_set), &(this->master_set), sizeof(this->master_set));
 
-      if (rc < 0)
-      {
-         perror("  select() failed");
-         break;
-      }
+        std::cout << "Waiting on select()...\n";
+        rc = select(this->max_sd + 1, &(this->working_set), NULL, NULL, &(this->timeout));
 
-      if (rc == 0)
-      {
-         std::cout << "  select() timed out.  End program.\n";
-         break;
-      }
+        if (rc < 0)
+        {
+           perror("  select() failed");
+           break;
+        }
 
-      this->check_descriptors(rc, end_server, close_conn);
+        if (rc == 0)
+        {
+           std::cout << "  select() timed out.  End program.\n";
+           break;
+        }
 
-   } //while (end_server == FALSE);
+        this->check_descriptors(rc, end_server, close_conn);
+
+    } while (end_server == FALSE);
 }
 
 void    Webserver::check_descriptors(int desc_ready,
     int& end_server, int& close_conn)
 {
-    //std::cout << "max_sd: " << this->max_sd << " " << desc_ready << "\n";
+
     for (int i=0; i <= this->max_sd  &&  desc_ready > 0; ++i)
-    {
-        //std::cout << "i: " << i << " " << this->max_sd << "\n";
-        if (FD_ISSET(i, &(this->working_set)))
-        {
+      {
+         if (FD_ISSET(i, &(this->working_set)))
+         {
             desc_ready -= 1;
-            //std::cout << "lid: " << this->listen_sd << " " << i << "\n";
+
             if (i == this->listen_sd)
             {
                std::cout << "  Listening socket is readable\n";
@@ -111,22 +109,20 @@ void    Webserver::check_descriptors(int desc_ready,
                close_conn = FALSE;
                
                this->receive_data(i, close_conn);
-               //std::cout << "close: " << close_conn << "\n";
+
                if (close_conn)
-                {
-                    close(i);
-                    FD_CLR(i, &(this->master_set));
-                    if (i == this->max_sd)
-                    {
-                        while (FD_ISSET(this->max_sd, &(this->master_set)) == FALSE)
-                            this->max_sd -= 1;
-                    }
-                }
+               {
+                  close(i);
+                  FD_CLR(i, &(this->master_set));
+                  if (i == this->max_sd)
+                  {
+                     while (FD_ISSET(this->max_sd, &(this->master_set)) == FALSE)
+                        this->max_sd -= 1;
+                  }
+               }
             } /* End of existing connection is readable */
-            //std::cout << "after max_sd: " << this->max_sd << " " << i << "\n";
-        } /* End of if (FD_ISSET(i, &working_set)) */
-    } /* End of loop through selectable descriptors */
-    //std::cout << "why?\n";
+         } /* End of if (FD_ISSET(i, &working_set)) */
+      } /* End of loop through selectable descriptors */
 }
 
 void    Webserver::accept_connections(int& end_server)
@@ -156,79 +152,50 @@ void    Webserver::accept_connections(int& end_server)
 void    Webserver::receive_data(int i, int& close_conn)
 {
     int len;
-    //char   buffer[800];
-    char    buffer[1];
-    std::string str = "";
-    std::vector<std::string> request;
-    int rc, rr;
+    char   buffer[1024];
+    int rc;
 
     //do
     while (TRUE)
     {
-        //std::cout << "there\n";
-        //rc = recv(i, buffer, sizeof(buffer), 0);
-        while ((rr = recv(i, buffer, sizeof(buffer), 0)) > 0)
+
+        while (TRUE)
         {
-            //std::cout << "rr: " << rr << "\n";
-            if (buffer[0] == '\n')
-            {
-                std::cout << "str: " << str << "\n";
-                request.push_back(str);
-                str.clear();
-            }
-            else
-                str += buffer[0];
+            rc = recv(i, buffer, sizeof(buffer), 0);
+                if (rc > 0)
+                {
+                    std::cout << "  recv() succes\n";
+                    break;
+                }
+                if (rc == 0)
+                {
+                    std::cout << "  Connection closed\n";
+                    close_conn = TRUE;
+                    break;
+                }
+                if (rc < 0)
+                {
+                    if (errno != EWOULDBLOCK)
+                    {
+                        perror("  recv() failed");
+                        close_conn = TRUE;
+                    }
+                    continue;
+                }
         }
-        if (!str.empty())
-            request.push_back(str);
-        //std::cout << "recv: " << rr << "\n";
-        /*if (rr < 0)
-        {
-            //std::cout << "errno: " << errno << " " << EWOULDBLOCK << "\n";
-            if (errno != EWOULDBLOCK)
-            {
-                perror("  recv() failed");
-                close_conn = TRUE;
-            }
-            //close_conn = TRUE;
+        if (rc == 0)
             break;
-        }
-        if (rr == 0)
-        {
-            std::cout << "  Connection closed\n";
-            close_conn = TRUE;
-            break;
-        }*/
-        len = rr;
+        len = rc;
         std::cout << "  " << len << " bytes received\n";
         std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<!DOCTYPE html><html><head><title>Webserver page</title></head><body><h1>Webserver hello!</h1><br><img src='https://i.otzovik.com/objects/b/1380000/1371129.png'></body></html>";
-      
-        rc = send(i, response.c_str(), response.size(), 0);
-        //std::cout << "response sent\n";
-        //rc = send(i, buffer, len, 0);
-        if (rc < 0)
-        {
-            perror("  send() failed");
-            close_conn = TRUE;
-            break;
-        }
 
-        if (rr < 0)
-        {
-            //std::cout << "errno: " << errno << " " << EWOULDBLOCK << "\n";
-            if (errno != EWOULDBLOCK)
+        rc = send(i, response.c_str(), response.size(), 0);
+            //rc = send(i, buffer, len, 0);
+            if (rc < 0)
             {
-                perror("  recv() failed");
+                perror("  send() failed");
                 close_conn = TRUE;
+                break;
             }
-            //close_conn = TRUE;
-            break;
-        }
-        if (rr == 0)
-        {
-            std::cout << "  Connection closed\n";
-            close_conn = TRUE;
-            break;
-        }
     } //while (TRUE);
 }

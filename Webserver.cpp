@@ -1,6 +1,27 @@
 #include "Webserver.hpp"
 #include <vector>
 
+
+std::string		readHtml(const std::string& path)
+{
+    std::ofstream		file;
+    std::stringstream	buffer;
+
+//    if (pathIsFile(path))
+//    {
+        file.open(path.c_str(), std::ifstream::in);
+        if (file.is_open() == false)
+            return ("<!DOCTYPE html>\n<html><title>40404</title><body>There was an error finding your error page</body></html>\n");
+
+        buffer << file.rdbuf();
+        file.close();
+//        _type = "text/html";
+        return (buffer.str());
+//    }
+//    else
+//        return ("<!DOCTYPE html>\n<html><title>40404</title><body>There was an error finding your error page</body></html>\n");
+}
+
 Webserver::Webserver()
 {
     int rc;
@@ -158,44 +179,40 @@ void    Webserver::receive_data(int i, int& close_conn)
     //do
     while (TRUE)
     {
-
-        while (TRUE)
-        {
-            rc = recv(i, buffer, sizeof(buffer), 0);
-                if (rc > 0)
+        rc = recv(i, buffer, sizeof(buffer), 0);
+            if (rc > 0)
+            {
+                std::cout << "  recv() succes\n";
+                len = rc;
+                std::cout << "  " << len << " bytes received\n";
+                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n" + readHtml("test.html");
+                std::cout << response;
+                rc = send(i, response.c_str(), response.size(), 0);
+                //rc = send(i, buffer, len, 0);
+                if (rc < 0)
                 {
-                    std::cout << "  recv() succes\n";
-                    break;
-                }
-                if (rc == 0)
-                {
-                    std::cout << "  Connection closed\n";
+                    perror("  send() failed");
                     close_conn = TRUE;
                     break;
                 }
-                if (rc < 0)
-                {
-                    if (errno != EWOULDBLOCK)
-                    {
-                        perror("  recv() failed");
-                        close_conn = TRUE;
-                    }
-                    continue;
-                }
-        }
-        if (rc == 0)
-            break;
-        len = rc;
-        std::cout << "  " << len << " bytes received\n";
-        std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n<!DOCTYPE html><html><head><title>Webserver page</title></head><body><h1>Webserver hello!</h1><br><img src='https://i.otzovik.com/objects/b/1380000/1371129.png'></body></html>";
-
-        rc = send(i, response.c_str(), response.size(), 0);
-            //rc = send(i, buffer, len, 0);
-            if (rc < 0)
+                break;
+            }
+            if (rc == 0)
             {
-                perror("  send() failed");
+                std::cout << "  Connection closed\n";
                 close_conn = TRUE;
                 break;
             }
+            if (rc < 0)
+            {
+                if (errno != EWOULDBLOCK)
+                {
+                    perror("  recv() failed");
+                    close_conn = TRUE;
+                }
+                break;
+            }
+        break;
     } //while (TRUE);
 }
+

@@ -3,6 +3,8 @@
 
 #include <cstdlib> // For exit() and EXIT_FAILURE
 #include <iostream> // For cout
+#include <fstream>
+#include <sstream>
 #include <unistd.h> // For read
 #include <sys/ioctl.h>
 #include <sys/socket.h>

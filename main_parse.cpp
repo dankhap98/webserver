@@ -1,6 +1,7 @@
 #include "Configuration.hpp"
 #include "ConfigServer.hpp"
 #include "ConfigLocation.hpp"
+#include "Webserver.hpp"
 
 void   print_location_properties(std::vector<ConfigLocation> cl)
 {
@@ -29,8 +30,8 @@ void   print_location_properties(std::vector<ConfigLocation> cl)
 
 int    main()
 {
-    Configuration *conf = new Configuration("./test.conf");
-
+    Configuration *conf = new Configuration("./test2.conf");
+    
 
     try{
         conf->loadConfig();
@@ -40,11 +41,14 @@ int    main()
         //std::cout << cs.size() << "\n";
         //std::cout << cs[0].getProps().size() << "\n";
         std::vector<ConfigServer>::iterator bg = cs.begin();
-
+        //Webserver wb[cs.size()];
+       
         //int count = 0;
         while(bg != cs.end())
         {
             std::cout << "ServerConfig\n";
+            std::cout << "Address: " << (*bg).getAddress() << "\n";
+            std::cout << "Port: " << (*bg).getPort() << "\n";
             //std::cout << (*bg).getLocations().size() << "\n";
             std::map<std::string, std::string> props = (*bg).getProps();
             //std::cout << props.size() << "\n";

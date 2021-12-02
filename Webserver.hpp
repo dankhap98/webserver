@@ -38,6 +38,7 @@ class Webserver
 
     public:
         Webserver();
+        Webserver(int port);
         //Webserver(int listenSD, struct sockaddr_in6 address, struct timeval tout);
         ~Webserver();
 

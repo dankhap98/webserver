@@ -30,6 +30,7 @@ void    Configuration::loadConfig()
             if ((words[0] == "server" && words[1] == "{") || (words[0] == "{" && multirow_flag)) // "{" may be in next row
             {
                 ConfigServer new_server = this->loadServerConfig(conf_to_read);
+                this->setServerAddress(&new_server);
                 this->servers.push_back(new_server);
                 multirow_flag = 0;
             }
@@ -164,7 +165,7 @@ void    Configuration::parse_words(std::string line, std::vector<std::string>& w
         if (pos == -1)
             pos = line.size();
         words.push_back(line.substr(start, pos));
-        if (pos == line.size())
+        if ((size_t)pos == line.size())
             beg = line.end();
         else
             beg+=pos + 1;
@@ -176,4 +177,29 @@ void    Configuration::parse_words(std::string line, std::vector<std::string>& w
 std::vector<ConfigServer>   Configuration::getServers()
 {
     return this->servers;
+}
+
+void    Configuration::setServerAddress(ConfigServer *cs)
+{
+    int pos = 0;
+    std::map<std::string, std::string> props = (*cs).getProps();
+
+    if (props.find("listen") != props.end())
+    {
+        //std::cout << "--" << props["listen"] << "--\n";
+        pos = props["listen"].find_first_of(":", pos);
+        //std::cout << "--" << pos << "--\n";
+        std::string addr = props["listen"].substr(0, pos);
+        //std::cout << "--" << addr << "--\n";
+        int port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size())).c_str());
+        //std::cout << "--" << port << "--\n";
+        //need to check if addr or port is null
+        //need to do many key = listen params exist 
+        (*cs).setAddress(addr);
+        //std::cout << "--" << cs.getAddress() << "--\n";
+        (*cs).setPort(port);
+        //std::cout << "--" << cs.getPort() << "--\n";
+    }
+
+    
 }

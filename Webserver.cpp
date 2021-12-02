@@ -58,6 +58,42 @@ Webserver::Webserver()
    std::cout << "Server created\n";
 }
 
+Webserver::Webserver(int port)
+{
+    int rc;
+    int on = 1;
+
+   this->listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
+   this->check_errors(this->listen_sd, "socket() failed");
+
+   rc = setsockopt(this->listen_sd, SOL_SOCKET,  SO_REUSEADDR,
+                   (char *)&on, sizeof(on));
+   this->check_errors(rc, "setsockopt() failed", 1);
+
+   rc = ioctl(this->listen_sd, FIONBIO, (char *)&on);
+   this->check_errors(rc, "ioctl() failed", 1);
+
+   memset(&(this->addr), 0, sizeof(this->addr));
+   this->addr.sin6_family      = AF_INET6;
+   memcpy(&(this->addr.sin6_addr), &in6addr_any, sizeof(in6addr_any));
+   this->addr.sin6_port        = htons(port);
+   rc = bind(this->listen_sd,
+             (struct sockaddr *)&(this->addr), sizeof(this->addr));
+   this->check_errors(rc, "bind() failed", 1);
+
+   rc = listen(this->listen_sd, 32);
+   this->check_errors(rc, "listen() failed", 1);
+
+   FD_ZERO(&(this->master_set));
+   this->max_sd = this->listen_sd;
+   FD_SET(this->listen_sd, &master_set);
+
+   this->timeout.tv_sec  = 3 * 60;
+   this->timeout.tv_usec = 0;
+
+   std::cout << "Server created\n";
+}
+
 Webserver::~Webserver() 
 {
     for (int i=0; i <= this->max_sd; ++i)

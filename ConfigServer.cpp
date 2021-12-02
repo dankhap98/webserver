@@ -1,6 +1,6 @@
 #include "ConfigServer.hpp"
 
-ConfigServer::ConfigServer(): props() {}
+ConfigServer::ConfigServer(): props(), locations(), ip_address(), port() {}
 
 ConfigServer::~ConfigServer() {}
 
@@ -16,6 +16,8 @@ ConfigServer & ConfigServer::operator=(const ConfigServer& cs)
 
     this->props = (std::map<std::string, std::string>(cs.props)); //std::move(cs.props);
     this->locations = cs.locations;
+    this->ip_address = cs.ip_address;
+    this->port = cs.port;
 
     return *this;
 }
@@ -43,4 +45,24 @@ std::string ConfigServer::getProperty(std::string name)
 void    ConfigServer::setLocation(ConfigLocation cl)
 {
     this->locations.push_back(cl);
+}
+
+void    ConfigServer::setAddress(std::string addr)
+{
+    this->ip_address = addr;
+}
+
+void    ConfigServer::setPort(int server_port)
+{
+    this->port = server_port;
+}
+
+std::string ConfigServer::getAddress() const
+{
+    return this->ip_address;
+}
+
+int ConfigServer::getPort() const
+{
+    return this->port;
 }

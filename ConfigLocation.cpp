@@ -1,8 +1,8 @@
 #include "ConfigLocation.hpp"
 
-ConfigLocation::ConfigLocation(): props(), sub_locations(), url("") {}
+ConfigLocation::ConfigLocation(): url(""), props(), sub_locations() {}
 
-ConfigLocation::ConfigLocation(std::string path): props(), sub_locations(), url(path) {}
+ConfigLocation::ConfigLocation(std::string path): url(path), props(), sub_locations() {}
 
 ConfigLocation::~ConfigLocation() {}
 

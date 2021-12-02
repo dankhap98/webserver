@@ -21,6 +21,7 @@ class Configuration
 
         void    trim_line(std::string& line);
         void    parse_words(std::string line, std::vector<std::string>& words);
+        void    setServerAddress(ConfigServer *cs);
 
     public:
         Configuration();

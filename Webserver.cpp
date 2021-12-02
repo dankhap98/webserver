@@ -117,7 +117,7 @@ void  Webserver::check_errors(int flag, std::string msg, int cls)
 
 void    Webserver::start()
 {
-    int rc = 0;
+    //int rc = 0;
     int end_server = FALSE;
     int close_conn;
     std::string	dot[3] = {".  ", ".. ", "..."};
@@ -219,7 +219,7 @@ void    Webserver::receive_data(int i, int& close_conn)
             if (rc > 0)
             {
                 std::cout << "  recv() succes\n";
-//                std::cout << buffer << std::endl;
+                std::cout << buffer.data() << std::endl;
                 len = rc;
                 std::cout << "  " << len << " bytes received\n";
                 std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Lenght: 60\n\n" + readHtml("test.html");

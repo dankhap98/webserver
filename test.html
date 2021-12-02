@@ -34,5 +34,14 @@
     <div class="button" id="MyFormPanel">
         {% block btn_panel %}{% endblock %}
     </div>
+
+    <form method="POST" action="/foo.php">
+ 
+        First Name: <input type="text" name="first_name" /> <br />
+        Last Name: <input type="text" name="last_name" /> <br />
+         
+        <input type="submit" name="action" value="Submit" />
+         
+        </form>
 </body>
 </html>

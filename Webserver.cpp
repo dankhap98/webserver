@@ -52,7 +52,7 @@ Webserver::Webserver()
    this->max_sd = this->listen_sd;
    FD_SET(this->listen_sd, &master_set);
 
-   this->timeout.tv_sec  = 3 * 60;
+   this->timeout.tv_sec  = 1;
    this->timeout.tv_usec = 0;
 
    std::cout << "Server created\n";
@@ -81,32 +81,32 @@ void  Webserver::check_errors(int flag, std::string msg, int cls)
 
 void    Webserver::start()
 {
-    int rc;
+    int rc = 0;
     int end_server = FALSE;
     int close_conn;
+    std::string	dot[3] = {".  ", ".. ", "..."};
+    int			n = 0;
 
-    do
-    {
-        memcpy(&(this->working_set), &(this->master_set), sizeof(this->master_set));
+    while(1) {
+        int rc = 0;
+        while (rc == 0) {
+            memcpy(&(this->working_set), &(this->master_set), sizeof(this->master_set));
+            FD_ZERO(&(this->write_set));
+            std::cout << "\rWaiting on select()" << dot[n++] << std::flush;
+            if (n == 3)
+                n = 0;
+            rc = select(this->max_sd + 1, &(this->working_set), NULL, NULL, &(this->timeout));
 
-        std::cout << "Waiting on select()...\n";
-        rc = select(this->max_sd + 1, &(this->working_set), NULL, NULL, &(this->timeout));
+            this->check_descriptors(rc, end_server, close_conn);
 
-        if (rc < 0)
-        {
-           perror("  select() failed");
-           break;
         }
 
-        if (rc == 0)
-        {
-           std::cout << "  select() timed out.  End program.\n";
-           break;
+        if (rc < 0) {
+            perror("  select() failed");
+//            FD_CLR()
+            break;
         }
-
-        this->check_descriptors(rc, end_server, close_conn);
-
-    } while (end_server == FALSE);
+    }
 }
 
 void    Webserver::check_descriptors(int desc_ready,
@@ -173,22 +173,22 @@ void    Webserver::accept_connections(int& end_server)
 void    Webserver::receive_data(int i, int& close_conn)
 {
     int len;
-    char   buffer[1024];
+    std::vector<char> buffer(5000);
     int rc;
 
     //do
     while (TRUE)
     {
-        rc = recv(i, buffer, sizeof(buffer), 0);
+        rc = recv(i, buffer.data(), buffer.size(), 0);
             if (rc > 0)
             {
                 std::cout << "  recv() succes\n";
+//                std::cout << buffer << std::endl;
                 len = rc;
                 std::cout << "  " << len << " bytes received\n";
-                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n" + readHtml("test.html");
-                std::cout << response;
+                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Lenght: 60\n\n" + readHtml("test.html");
+                std::cout << "response";
                 rc = send(i, response.c_str(), response.size(), 0);
-                //rc = send(i, buffer, len, 0);
                 if (rc < 0)
                 {
                     perror("  send() failed");

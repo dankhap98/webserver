@@ -5,6 +5,7 @@
 #include <iostream> // For cout
 #include <fstream>
 #include <sstream>
+#include <vector>
 #include <unistd.h> // For read
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -24,6 +25,7 @@ class Webserver
         int     max_sd;
         struct sockaddr_in6 addr;
         struct timeval timeout;
+        fd_set  write_set;
         fd_set  master_set;
         fd_set  working_set;
 

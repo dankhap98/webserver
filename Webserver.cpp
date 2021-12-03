@@ -222,7 +222,8 @@ void    Webserver::receive_data(int i, int& close_conn)
                 std::cout << buffer.data() << std::endl;
                 len = rc;
                 std::cout << "  " << len << " bytes received\n";
-                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Lenght: 60\n\n" + readHtml("test.html");
+                std::string html_text = readHtml("test.html");
+                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  " + std::to_string(html_text.size()) + "\n\n" + html_text; //+ readHtml("test.html");
                 std::cout << "response";
                 rc = send(i, response.c_str(), response.size(), 0);
                 if (rc < 0)

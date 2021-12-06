@@ -74,3 +74,89 @@ void    Request::show() //temporary func
     std::cout << "__BODY__\n";
     std::cout << this->_body << "\n";
 }
+
+void    Request::parseRequest(std::string request)
+{
+    //unsigned long strSize;
+    int start = 0;
+    int pos = 0;
+    int npos = 0;
+
+    if (getMethod().size() == 0)
+    {
+        npos = request.find_first_of("\n", start);
+        std::string method_row = request.substr(start, npos - start);
+        pos = method_row.find_first_of(" \t", start);
+        setMethod(method_row.substr(start, pos - start));
+        start = pos + 1;
+        pos = method_row.find_first_of(" \t", start);
+        setUrl(method_row.substr(start, pos - start));
+        start = pos + 1;
+        pos = method_row.find_first_of(" \t", start);
+        setStatus(method_row.substr(start, pos - start));
+        start = npos + 1;
+        pos = 0;
+        npos = 0;
+    }
+    while (true)
+    {
+        npos = request.find_first_of("\n", start);
+        std::string header_row = request.substr(start, npos - start);
+        if (header_row.size() == 0 || header_row.size() == 1)
+            break ;
+        pos = header_row.find_first_of(":", 0);
+        std::string key = header_row.substr(0, pos);
+        std::string value = header_row.substr(pos + 2, header_row.size() - pos - 2);
+        addHeader(key, value);
+        start = npos + 1;
+        pos = 0;
+        if (npos == -1)
+            break;
+        npos = 0;
+    }
+    if (getMethod() == "POST" && npos > 0)
+    {
+        start = npos + 1;
+        npos = request.find_first_of("\n", start);
+        std::string params_row = request.substr(start, npos - start);
+        start = 0;
+        if (npos != -1 || params_row.size() > 0)
+        {
+            while (true)
+            {
+                npos = params_row.find_first_of("&", start);
+                std::string param = params_row.substr(start, npos - start);
+                pos = param.find_first_of("=", 0);
+                addParam(param.substr(0, pos), param.substr(pos + 1, param.size() - pos - 1));
+                start = npos + 1;
+                pos = 0;
+                if (npos == (int)params_row.size() || npos == -1)
+                    break;
+                npos = 0;
+            }
+        }
+    }
+    else if (getMethod() == "GET" && npos > 0)
+    {
+        npos = getUrl().find_first_of("?", 0);
+        if (npos != -1)
+        {
+            std::string params_row = getUrl().substr(npos + 1, getUrl().size() - npos - 1);
+            start = 0;
+            while (true)
+            {
+                npos = params_row.find_first_of("&", start);
+                std::string param = params_row.substr(start, npos - start);
+                pos = param.find_first_of("=", 0);
+                addParam(param.substr(0, pos), param.substr(pos + 1, param.size() - pos - 1));
+                start = npos + 1;
+                pos = 0;
+                if (npos == (int)params_row.size() || npos == -1)
+                    break;
+                npos = 0;
+            }
+        }
+    }
+    if (npos != -1)
+        setBody(request.substr(npos, request.size() - npos));
+}

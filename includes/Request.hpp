@@ -1,8 +1,7 @@
 #ifndef REQUEST_HPP
 # define REQUEST_HPP
 
-#include <iostream>
-#include <map>
+#include "server.hpp"
 
 class Request
 {
@@ -26,7 +25,7 @@ class Request
         void    addHeader(std::string key, std::string value);
         void    addParam(std::string key, std::string value);
         void    setBody(std::string content);
-
+        void    parseRequest(std::string request);
         void    show();
 };
 

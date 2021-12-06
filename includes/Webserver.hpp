@@ -1,19 +1,7 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 
-#include <cstdlib> // For exit() and EXIT_FAILURE
-#include <iostream> // For cout
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <unistd.h> // For read
-#include <sys/ioctl.h>
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <netinet/in.h>
-#include <errno.h>
-#include "Request.hpp"
-#include "Configuration.hpp"
+#include "server.hpp"
 
 #define SERVER_PORT  8080
 

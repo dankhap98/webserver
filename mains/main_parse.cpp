@@ -1,7 +1,7 @@
-#include "../Configuration.hpp"
-#include "../ConfigServer.hpp"
-#include "../ConfigLocation.hpp"
-#include "../Webserver.hpp"
+#include "../includes/Configuration.hpp"
+#include "../includes/ConfigServer.hpp"
+#include "../includes/ConfigLocation.hpp"
+#include "../includes/Webserver.hpp"
 
 void   print_location_properties(std::vector<ConfigLocation> cl)
 {

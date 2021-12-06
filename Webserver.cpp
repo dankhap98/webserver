@@ -27,78 +27,115 @@ Webserver::Webserver()
     int rc;
     int on = 1;
 
-   this->listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
-   this->check_errors(this->listen_sd, "socket() failed");
+   listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
+   check_errors(listen_sd, "socket() failed");
 
-   rc = setsockopt(this->listen_sd, SOL_SOCKET,  SO_REUSEADDR,
+   rc = setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR,
                    (char *)&on, sizeof(on));
-   this->check_errors(rc, "setsockopt() failed", 1);
+   check_errors(rc, "setsockopt() failed", 1);
 
-   rc = ioctl(this->listen_sd, FIONBIO, (char *)&on);
-   this->check_errors(rc, "ioctl() failed", 1);
+   rc = ioctl(listen_sd, FIONBIO, (char *)&on);
+   check_errors(rc, "ioctl() failed", 1);
 
-   memset(&(this->addr), 0, sizeof(this->addr));
-   this->addr.sin6_family      = AF_INET6;
-   memcpy(&(this->addr.sin6_addr), &in6addr_any, sizeof(in6addr_any));
-   this->addr.sin6_port        = htons(SERVER_PORT);
-   rc = bind(this->listen_sd,
-             (struct sockaddr *)&(this->addr), sizeof(this->addr));
-   this->check_errors(rc, "bind() failed", 1);
+   memset(&(addr), 0, sizeof(addr));
+   addr.sin6_family      = AF_INET6;
+   memcpy(&(addr.sin6_addr), &in6addr_any, sizeof(in6addr_any));
+   addr.sin6_port        = htons(SERVER_PORT);
+   rc = bind(listen_sd,
+             (struct sockaddr *)&(addr), sizeof(addr));
+   check_errors(rc, "bind() failed", 1);
 
-   rc = listen(this->listen_sd, 32);
-   this->check_errors(rc, "listen() failed", 1);
+   rc = listen(listen_sd, 32);
+   check_errors(rc, "listen() failed", 1);
 
-   FD_ZERO(&(this->master_set));
-   this->max_sd = this->listen_sd;
-   FD_SET(this->listen_sd, &master_set);
+   FD_ZERO(&(master_set));
+   max_sd = listen_sd;
+   FD_SET(listen_sd, &master_set);
 
-   this->timeout.tv_sec  = 1;
-   this->timeout.tv_usec = 0;
+   timeout.tv_sec  = 1;
+   timeout.tv_usec = 0;
 
    std::cout << "Server created\n";
 }
 
 Webserver::Webserver(int port)
 {
-    int rc;
     int on = 1;
 
-   this->listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
-   this->check_errors(this->listen_sd, "socket() failed");
+    listen_sd = socket(AF_INET, SOCK_STREAM, 0);
+    check_errors(listen_sd, "socket() failed");
 
-   rc = setsockopt(this->listen_sd, SOL_SOCKET,  SO_REUSEADDR,
-                   (char *)&on, sizeof(on));
-   this->check_errors(rc, "setsockopt() failed", 1);
+    if((setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on))) < 0)
+        check_errors(-1, "setsockopt() failed", 1);
 
-   rc = ioctl(this->listen_sd, FIONBIO, (char *)&on);
-   this->check_errors(rc, "ioctl() failed", 1);
+    if((ioctl(listen_sd, FIONBIO, (char *)&on)) < 0)
+        check_errors(-1, "ioctl() failed", 1);
 
-   memset(&(this->addr), 0, sizeof(this->addr));
-   this->addr.sin6_family      = AF_INET6;
-   memcpy(&(this->addr.sin6_addr), &in6addr_any, sizeof(in6addr_any));
-   this->addr.sin6_port        = htons(port);
-   rc = bind(this->listen_sd,
-             (struct sockaddr *)&(this->addr), sizeof(this->addr));
-   this->check_errors(rc, "bind() failed", 1);
+    memset((char *)&_addr, 0, sizeof(_addr));
+    _addr.sin_family = AF_INET;
+    _addr.sin_addr.s_addr = INADDR_ANY;
+    _addr.sin_port = htons(port);
+    if (bind(listen_sd, (struct sockaddr *)&_addr, sizeof(_addr)) == -1)
+    {
+        std::cerr << "Could not bind port " << port << "." << std::endl;
+        exit(-1);
+    }
+    else if (listen(listen_sd, 1000) == -1)
+    {
+        std::cerr << "Could not listen." << std::endl;
+        exit(-1);
+    }
+    else
+    {
+        FD_ZERO(&(master_set));
+        max_sd = listen_sd;
+        FD_SET(listen_sd, &master_set);
+        std::cout << "Sever created!";
+        timeout.tv_sec  = 1;
+        timeout.tv_usec = 0;
+    }
 
-   rc = listen(this->listen_sd, 32);
-   this->check_errors(rc, "listen() failed", 1);
+    //                          IPV6 VER
 
-   FD_ZERO(&(this->master_set));
-   this->max_sd = this->listen_sd;
-   FD_SET(this->listen_sd, &master_set);
-
-   this->timeout.tv_sec  = 3 * 60;
-   this->timeout.tv_usec = 0;
-
-   std::cout << "Server created\n";
+//    int rc;
+//    int on = 1;
+//
+//   listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
+//   check_errors(listen_sd, "socket() failed");
+//
+//   rc = setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR,
+//                   (char *)&on, sizeof(on));
+//   check_errors(rc, "setsockopt() failed", 1);
+//
+//   rc = ioctl(listen_sd, FIONBIO, (char *)&on);
+//   check_errors(rc, "ioctl() failed", 1);
+//
+//   memset(&(addr), 0, sizeof(addr));
+//   addr.sin6_family      = AF_INET6;
+//   memcpy(&(addr.sin6_addr), &in6addr_any, sizeof(in6addr_any));
+//   addr.sin6_port        = htons(port);
+//   rc = bind(listen_sd,
+//             (struct sockaddr *)&(addr), sizeof(addr));
+//   check_errors(rc, "bind() failed", 1);
+//
+//   rc = listen(listen_sd, 32);
+//   check_errors(rc, "listen() failed", 1);
+//
+//   FD_ZERO(&(master_set));
+//   max_sd = listen_sd;
+//   FD_SET(listen_sd, &master_set);
+//
+//   timeout.tv_sec  = 3 * 60;
+//   timeout.tv_usec = 0;
+//
+//   std::cout << "Server created\n";
 }
 
 Webserver::~Webserver() 
 {
-    for (int i=0; i <= this->max_sd; ++i)
+    for (int i=0; i <= max_sd; ++i)
     {
-      if (FD_ISSET(i, &(this->master_set)))
+      if (FD_ISSET(i, &(master_set)))
          close(i);
     }
 }
@@ -109,15 +146,13 @@ void  Webserver::check_errors(int flag, std::string msg, int cls)
    {
       perror(msg.c_str());
       if (cls)
-         close(this->listen_sd);
-      //if (ex)
+         close(listen_sd);
       exit(-1);
    }
 }
 
 void    Webserver::start()
 {
-    //int rc = 0;
     int end_server = FALSE;
     int close_conn;
     std::string	dot[3] = {".  ", ".. ", "..."};
@@ -126,20 +161,19 @@ void    Webserver::start()
     while(1) {
         int rc = 0;
         while (rc == 0) {
-            memcpy(&(this->working_set), &(this->master_set), sizeof(this->master_set));
-            FD_ZERO(&(this->write_set));
+            memcpy(&(working_set), &(master_set), sizeof(master_set));
+            FD_ZERO(&(write_set));
             std::cout << "\rWaiting on select()" << dot[n++] << std::flush;
             if (n == 3)
                 n = 0;
-            rc = select(this->max_sd + 1, &(this->working_set), NULL, NULL, &(this->timeout));
+            rc = select(max_sd + 1, &(working_set), NULL, NULL, &(timeout));
 
-            this->check_descriptors(rc, end_server, close_conn);
+            check_descriptors(rc, end_server, close_conn);
 
         }
 
         if (rc < 0) {
             perror("  select() failed");
-//            FD_CLR()
             break;
         }
     }
@@ -149,32 +183,32 @@ void    Webserver::check_descriptors(int desc_ready,
     int& end_server, int& close_conn)
 {
 
-    for (int i=0; i <= this->max_sd  &&  desc_ready > 0; ++i)
+    for (int i=0; i <= max_sd  &&  desc_ready > 0; ++i)
       {
-         if (FD_ISSET(i, &(this->working_set)))
+         if (FD_ISSET(i, &(working_set)))
          {
             desc_ready -= 1;
 
-            if (i == this->listen_sd)
+            if (i == listen_sd)
             {
                std::cout << "  Listening socket is readable\n";
-               this->accept_connections(end_server);
+               accept_connections(end_server);
             }
             else
             {
                std::cout << "  Descriptor " << i << " is readable\n";
                close_conn = FALSE;
                
-               this->receive_data(i, close_conn);
+               receive_data(i, close_conn);
 
                if (close_conn)
                {
                   close(i);
-                  FD_CLR(i, &(this->master_set));
-                  if (i == this->max_sd)
+                  FD_CLR(i, &(master_set));
+                  if (i == max_sd)
                   {
-                     while (FD_ISSET(this->max_sd, &(this->master_set)) == FALSE)
-                        this->max_sd -= 1;
+                     while (FD_ISSET(max_sd, &(master_set)) == FALSE)
+                        max_sd -= 1;
                   }
                }
             } /* End of existing connection is readable */
@@ -185,10 +219,9 @@ void    Webserver::check_descriptors(int desc_ready,
 void    Webserver::accept_connections(int& end_server)
 {
     int new_sd = 0;
-    //do
     while (new_sd != -1)
     {
-        new_sd = accept(this->listen_sd, NULL, NULL);
+        new_sd = accept(listen_sd, NULL, NULL);
         if (new_sd < 0)
         {
             if (errno != EWOULDBLOCK)
@@ -199,11 +232,10 @@ void    Webserver::accept_connections(int& end_server)
             break;
         }
         std::cout << "  New incoming connection - " << new_sd << "\n";
-        FD_SET(new_sd, &(this->master_set));
-        if (new_sd > this->max_sd)
-            this->max_sd = new_sd;
+        FD_SET(new_sd, &(master_set));
+        if (new_sd > max_sd)
+            max_sd = new_sd;
     }
-    //} while (new_sd != -1);
 }
 
 void    Webserver::receive_data(int i, int& close_conn)
@@ -212,7 +244,6 @@ void    Webserver::receive_data(int i, int& close_conn)
     std::vector<char> buffer(5000);
     int rc;
 
-    //do
     while (TRUE)
     {
         rc = recv(i, buffer.data(), buffer.size(), 0);
@@ -250,6 +281,6 @@ void    Webserver::receive_data(int i, int& close_conn)
                 break;
             }
         break;
-    } //while (TRUE);
+    }
 }
 

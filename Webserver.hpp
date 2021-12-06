@@ -23,6 +23,7 @@ class Webserver
     private:
         int     listen_sd;
         int     max_sd;
+        struct sockaddr_in	_addr;
         struct sockaddr_in6 addr;
         struct timeval timeout;
         fd_set  write_set;
@@ -30,6 +31,7 @@ class Webserver
         fd_set  working_set;
 
         Webserver(const Webserver& w);
+        Webserver();
         Webserver & operator=(const Webserver& w);
 
         void    check_errors(int flag, std::string msg, int cls = 0);
@@ -39,9 +41,7 @@ class Webserver
         void    check_descriptors(int desc_ready, int& end_server, int& close_conn);
 
     public:
-        Webserver();
         Webserver(int port);
-        //Webserver(int listenSD, struct sockaddr_in6 address, struct timeval tout);
         ~Webserver();
 
         void    start();

@@ -25,7 +25,7 @@ class ConfigLocation
 
         props_type  getProps();
         std::string getUrl();
-        void        setUrl(const std::string& path, int del_end);
+        void        setUrl(const std::string& path);
         sub_loc_type    get_SubLocations();
         void     setProperty(std::string name, std::string value);
         std::string getProperty(std::string);

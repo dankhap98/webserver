@@ -28,11 +28,9 @@ std::string     ConfigLocation::getUrl()
     return this->url;
 }
 
-void     ConfigLocation::setUrl(const std::string& path, int del_end)
+void     ConfigLocation::setUrl(const std::string& path)
 {
     this->url = path;
-    if (del_end)
-        this->url.pop_back();
 }
 
 ConfigLocation::props_type  ConfigLocation::getProps()

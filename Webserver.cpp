@@ -219,9 +219,11 @@ void    Webserver::receive_data(int i, int& close_conn)
             if (rc > 0)
             {
                 std::cout << "  recv() succes\n";
-                std::cout << buffer.data() << std::endl;
-                len = rc;
-                std::cout << "  " << len << " bytes received\n";
+                //std::cout << buffer.data() << std::endl;
+                //len = rc;
+                //std::cout << "  " << len << " bytes received\n";
+                Request req = this->parse_request(buffer.data());
+                req.show();
                 std::string html_text = readHtml("test.html");
                 std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  " + std::to_string(html_text.size()) + "\n\n" + html_text; //+ readHtml("test.html");
                 std::cout << "response";
@@ -251,5 +253,93 @@ void    Webserver::receive_data(int i, int& close_conn)
             }
         break;
     } //while (TRUE);
+}
+
+Request &Webserver::parse_request(std::string request)
+{
+    Request *req = new Request();
+    int start = 0;
+    int pos = 0;
+    int npos = 0;
+
+    if ((*req).getMethod().size() == 0)
+    {
+        npos = request.find_first_of("\n", start);
+        std::string method_row = request.substr(start, npos - start);
+        pos = method_row.find_first_of(" \t", start);
+        (*req).setMethod(method_row.substr(start, pos - start));
+        start = pos + 1;
+        pos = method_row.find_first_of(" \t", start);
+        (*req).setUrl(method_row.substr(start, pos - start));
+        start = pos + 1;
+        pos = method_row.find_first_of(" \t", start);
+        (*req).setStatus(method_row.substr(start, pos - start));
+        start = npos + 1;
+        pos = 0;
+        npos = 0;
+    }
+    while (true)
+    {
+        npos = request.find_first_of("\n", start);
+        std::string header_row = request.substr(start, npos - start);
+        if (header_row.size() == 0 || header_row.size() == 1)
+            break ;
+        pos = header_row.find_first_of(":", 0);
+        std::string key = header_row.substr(0, pos);
+        std::string value = header_row.substr(pos + 2, header_row.size() - pos - 2);
+        (*req).addHeader(key, value);
+        start = npos + 1;
+        pos = 0;
+        if (npos == -1)
+            break;
+        npos = 0;
+    }
+    if ((*req).getMethod() == "POST" && npos > 0)
+    {
+        start = npos + 1;
+        npos = request.find_first_of("\n", start);
+        std::string params_row = request.substr(start, npos - start);
+        start = 0;
+        if (npos != -1 || params_row.size() > 0)
+        {
+            while (true)
+            {
+                npos = params_row.find_first_of("&", start);
+                std::string param = params_row.substr(start, npos - start);
+                pos = param.find_first_of("=", 0);
+                (*req).addParam(param.substr(0, pos), param.substr(pos + 1, param.size() - pos - 1));
+                start = npos + 1;
+                pos = 0;
+                if (npos == params_row.size() || npos == -1)
+                    break;
+                npos = 0;
+            }
+        }
+    }
+    else if ((*req).getMethod() == "GET" && npos > 0)
+    {
+        npos = (*req).getUrl().find_first_of("?", 0);
+        if (npos != -1)
+        {
+            std::string params_row = (*req).getUrl().substr(npos + 1, (*req).getUrl().size() - npos - 1);
+            start = 0;
+            while (true)
+            {
+                npos = params_row.find_first_of("&", start);
+                std::string param = params_row.substr(start, npos - start);
+                pos = param.find_first_of("=", 0);
+                (*req).addParam(param.substr(0, pos), param.substr(pos + 1, param.size() - pos - 1));
+                start = npos + 1;
+                pos = 0;
+                if (npos == params_row.size() || npos == -1)
+                    break;
+                npos = 0;
+            }
+        }
+    }
+    if (npos != -1)
+        (*req).setBody(request.substr(npos, request.size() - npos));
+    
+    return *req;
 }
 

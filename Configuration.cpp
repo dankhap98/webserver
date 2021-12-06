@@ -65,11 +65,11 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf)
                 ConfigLocation new_loc = this->loadLocationConfig(conf);
                 if (multirow_flag)
                 {
-                    new_loc.setUrl(url, 0);
+                    new_loc.setUrl(url);
                     url.clear();
                 }
                 else
-                    new_loc.setUrl(words[1], 1);
+                    new_loc.setUrl(words[1]);
                 cs->setLocation(new_loc);
                 multirow_flag = 0;
             }
@@ -116,10 +116,10 @@ ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
                 ConfigLocation new_loc = this->loadLocationConfig(conf);
                 if (multirow_flag)
                 {
-                    new_loc.setUrl(url, 0);
+                    new_loc.setUrl(url);
                     url.clear();
                 }
-                new_loc.setUrl(words[1], 1);
+                new_loc.setUrl(words[1]);
                 cl->setLocation(new_loc);
                 multirow_flag = 0;
             }
@@ -164,7 +164,7 @@ void    Configuration::parse_words(std::string line, std::vector<std::string>& w
         pos = line.find_first_of(space_chars, pos);
         if (pos == -1)
             pos = line.size();
-        words.push_back(line.substr(start, pos));
+        words.push_back(line.substr(start, pos - start));
         if ((size_t)pos == line.size())
             beg = line.end();
         else
@@ -191,7 +191,7 @@ void    Configuration::setServerAddress(ConfigServer *cs)
         //std::cout << "--" << pos << "--\n";
         std::string addr = props["listen"].substr(0, pos);
         //std::cout << "--" << addr << "--\n";
-        int port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size())).c_str());
+        int port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size() - pos - 1)).c_str());
         //std::cout << "--" << port << "--\n";
         //need to check if addr or port is null
         //need to do many key = listen params exist 

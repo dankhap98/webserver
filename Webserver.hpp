@@ -12,6 +12,8 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include "Request.hpp"
+#include "Configuration.hpp"
 
 #define SERVER_PORT  8080
 
@@ -37,6 +39,7 @@ class Webserver
         void    accept_connections(int& end_server);
         void    receive_data(int i, int& close_conn);
         void    check_descriptors(int desc_ready, int& end_server, int& close_conn);
+        Request &parse_request(std::string request);
 
     public:
         Webserver();

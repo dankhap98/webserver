@@ -3,6 +3,9 @@
 
 #include "server.hpp"
 
+#include "Request.hpp"
+#include "Response.hpp"
+
 #define SERVER_PORT  8080
 
 #define TRUE             1

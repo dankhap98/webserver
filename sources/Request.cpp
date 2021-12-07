@@ -77,7 +77,6 @@ void    Request::show() //temporary func
 
 void    Request::parseRequest(std::string request)
 {
-    //unsigned long strSize;
     int start = 0;
     int pos = 0;
     int npos = 0;

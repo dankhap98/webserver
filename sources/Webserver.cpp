@@ -235,6 +235,7 @@ void    Webserver::accept_connections(int& end_server)
 void    Webserver::receive_data(int i, int& close_conn)
 {
     Request request;
+    Response response;
     std::vector<char> buffer(5000);
     int rc;
 
@@ -246,10 +247,11 @@ void    Webserver::receive_data(int i, int& close_conn)
                 std::cout << "  recv() succes\n";
                 request.parseRequest(buffer.data());
                 request.show();
-                std::string html_text = readHtml("test.html");
-                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  " + std::to_string(html_text.size()) + "\n\n" + html_text; //+ readHtml("test.html");
-                std::cout << "response";
-                rc = send(i, response.c_str(), response.size(), 0);
+//                std::string html_text = readHtml("test.html");
+//                std::string response = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  " + std::to_string(html_text.size()) + "\n\n" + html_text; //+ readHtml("test.html");
+//                std::cout << "response";
+                response.SetResponseMsg(request);
+                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
                 if (rc < 0)
                 {
                     perror("  send() failed");

@@ -1,2 +1,2 @@
 all:
-	clang++ -Wall -Wextra -Werror sources/main_parse_and_start.cpp sources/ConfigLocation.cpp sources/ConfigServer.cpp sources/Configuration.cpp sources/Webserver.cpp sources/Request.cpp includes/Request.hpp includes/Webserver.hpp includes/ConfigLocation.hpp includes/ConfigServer.hpp includes/Configuration.hpp
+	clang++ -Wall -Wextra -Werror sources/main_parse_and_start.cpp sources/ConfigLocation.cpp sources/ConfigServer.cpp sources/Configuration.cpp sources/Webserver.cpp sources/Request.cpp sources/Response.cpp includes/Response.hpp includes/Request.hpp includes/Webserver.hpp includes/ConfigLocation.hpp includes/ConfigServer.hpp includes/Configuration.hpp

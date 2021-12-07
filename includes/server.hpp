@@ -18,8 +18,6 @@
 #include <netinet/in.h>
 #include <errno.h>
 
-#include "Request.hpp"
-
 #define SERVER_PORT  8080
 
 #define TRUE             1

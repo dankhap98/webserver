@@ -5,6 +5,7 @@
 #ifndef WEBSRV_SERVER_HPP
 #define WEBSRV_SERVER_HPP
 
+//#include <cstdio>
 #include <cstdlib> // For exit() and EXIT_FAILURE
 #include <iostream> // For cout
 #include <fstream>

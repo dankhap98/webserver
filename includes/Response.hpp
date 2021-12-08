@@ -15,19 +15,19 @@ public:
 
     void            SetContentType();
     void            SetResponseMsg(Request &request);
+    void            SetPath(std::string url);
     void            GETResponse();
     void            POSTResponse();
     std::string		readHtml(const std::string& path);
-    void            SetPath(std::string url);
     std::string     GetResponseMsg();
 private:
-//    Request         request;
     std::string     ResponseMsg;
     std::string     Html_text;
     std::string     Path;
     std::string     content_type;
-    std::string     error_404;
 
+
+    std::string     error_404;
 };
 
 

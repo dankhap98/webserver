@@ -55,6 +55,8 @@ void            Response::SetResponseMsg(Request &request)
         GETResponse();
     if (request.getMethod() == "POST")
         POSTResponse();
+    if (request.getMethod() == "DELETE")
+        remove(Path.c_str());
 }
 
 void            Response::POSTResponse()

@@ -52,9 +52,11 @@ Webserver::Webserver()
    std::cout << "Server created\n";
 }
 
-Webserver::Webserver(int port)
+Webserver::Webserver(ConfigServer& conf_s)
 {
     int on = 1;
+    this->cs = new ConfigServer(conf_s);
+    int port= cs->getPort();
 
     listen_sd = socket(AF_INET, SOCK_STREAM, 0);
     check_errors(listen_sd, "socket() failed");

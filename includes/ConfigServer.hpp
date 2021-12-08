@@ -10,12 +10,15 @@ class ConfigServer
 {
     private:
         std::map<std::string, std::string> props;
+        std::map<int, std::string> error_pages;
         std::vector<ConfigLocation> locations;
+        std::vector<std::string> allow_methods;
         std::string ip_address;
         int port;
     
     public:
         typedef std::map<std::string, std::string> props_type;
+        typedef std::map<int, std::string> error_page_type;
         typedef std::vector<ConfigLocation> loc_type;
         ConfigServer();
         ~ConfigServer();
@@ -26,9 +29,13 @@ class ConfigServer
         void     setProperty(std::string name, std::string value);
         std::string     getProperty(std::string name);
         loc_type getLocations();
+        error_page_type getErrorPages();
+        std::vector<std::string>    getAllowMethods();
         void     setLocation(ConfigLocation cl);
         void     setAddress(std::string addr);
         void     setPort(int server_port);
+        void     setErrorPage(int code, std::string url);
+        void     addAllowMethod(std::string meth);
         std::string getAddress() const;
         int     getPort() const;
 };

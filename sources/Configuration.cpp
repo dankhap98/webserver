@@ -86,6 +86,8 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf)
                     cs->setProperty(words[0], "");
                 else if(words[0] == "}")
                     server_parse_end = true;
+                else if (words.size() > 2)
+                    this->parse_long_prop(cs, words);
             }
             words.clear();
         }
@@ -136,6 +138,9 @@ ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
                     cl->setProperty(words[0], "");
                 else if(words[0] == "}")
                     loc_parse_end = true;
+                else if(words.size() > 2)
+                    this->parse_long_prop(cl, words);
+
             }
             words.clear();
         }
@@ -186,20 +191,45 @@ void    Configuration::setServerAddress(ConfigServer *cs)
 
     if (props.find("listen") != props.end())
     {
-        //std::cout << "--" << props["listen"] << "--\n";
         pos = props["listen"].find_first_of(":", pos);
-        //std::cout << "--" << pos << "--\n";
         std::string addr = props["listen"].substr(0, pos);
-        //std::cout << "--" << addr << "--\n";
         int port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size() - pos - 1)).c_str());
-        //std::cout << "--" << port << "--\n";
         //need to check if addr or port is null
         //need to do many key = listen params exist 
         (*cs).setAddress(addr);
-        //std::cout << "--" << cs.getAddress() << "--\n";
         (*cs).setPort(port);
-        //std::cout << "--" << cs.getPort() << "--\n";
     }
+}
 
-    
+void    Configuration::parse_long_prop(ConfigServer * cs, std::vector<std::string>& words)
+{
+    int len = words.size();
+
+    if (words[0] == "error_page")
+    {
+        for (int i = 1; i < len - 1; i++)
+        {
+            cs->setErrorPage(std::atoi(words[i].c_str()), words[len -1]);
+        }
+    }
+    else if(words[0] == "allow_methods")
+    {
+        for (int i = 0; i < len; i++)
+        {
+            cs->addAllowMethod(words[i]);
+        }
+    }
+}
+
+void    Configuration::parse_long_prop(ConfigLocation * cl, std::vector<std::string>& words)
+{
+    int len = words.size();
+
+    if(words[0] == "allow_methods")
+    {
+        for (int i = 0; i < len; i++)
+        {
+            cl->addAllowMethod(words[i]);
+        }
+    }
 }

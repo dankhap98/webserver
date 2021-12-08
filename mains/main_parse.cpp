@@ -3,6 +3,20 @@
 #include "../includes/ConfigLocation.hpp"
 #include "../includes/Webserver.hpp"
 
+void    print_allow_meths(std::vector<std::string> meths)
+{
+    if (meths.size() > 0)
+    {
+        std::cout << "Allowed methods: \n";
+        std::vector<std::string>::iterator bg = meths.begin();
+        while (bg != meths.end())
+        {
+            std::cout << (*bg) << "\n";
+            ++bg;
+        }
+    }
+}
+
 void   print_location_properties(std::vector<ConfigLocation> cl)
 {
     std::vector<ConfigLocation>::iterator beg = cl.begin();
@@ -10,20 +24,27 @@ void   print_location_properties(std::vector<ConfigLocation> cl)
     while (beg != cl.end())
     {
         std::cout << "\nLocationConfig " << (*beg).getUrl() << "\n";
-        //std::cout << (*beg).get_SubLocations().size() << "\n";
         std::map<std::string, std::string> props = (*beg).getProps();
-        //std::cout << props.size() << "\n";
         std::map<std::string, std::string>::iterator bg = props.begin();
-            //count = 0;
-            //std::cout << props["root"] << "\n";
         while (bg != props.end())
         {
-                //if (count < 2)
             std::cout << (*bg).first << " : " << (*bg).second << "\n";
             ++bg;
-                //count++;
         }
+        print_allow_meths((*beg).getAllowMethods());
+        print_location_properties((*beg).get_SubLocations());
         std::cout << "end location config\n\n";
+        ++beg;
+    }
+}
+
+void    print_error_pages(std::map<int, std::string> error_pages)
+{
+    std::map<int, std::string>::iterator   beg = error_pages.begin();
+    std::cout << "ERROR_PAGES:\n";
+    while (beg != error_pages.end())
+    {
+        std::cout << (*beg).first << ": " << (*beg).second << "\n";
         ++beg;
     }
 }
@@ -38,31 +59,23 @@ int    main()
 
 
         std::vector<ConfigServer> cs = conf->getServers();
-        //std::cout << cs.size() << "\n";
-        //std::cout << cs[0].getProps().size() << "\n";
         std::vector<ConfigServer>::iterator bg = cs.begin();
-        //Webserver wb[cs.size()];
-       
-        //int count = 0;
+
         while(bg != cs.end())
         {
             std::cout << "ServerConfig\n";
             std::cout << "Address: " << (*bg).getAddress() << "\n";
             std::cout << "Port: " << (*bg).getPort() << "\n";
-            //std::cout << (*bg).getLocations().size() << "\n";
             std::map<std::string, std::string> props = (*bg).getProps();
-            //std::cout << props.size() << "\n";
             std::map<std::string, std::string>::iterator beg = props.begin();
-            //count = 0;
-            //std::cout << props["root"] << "\n";
             while (beg != props.end())
             {
-                //if (count < 2)
                 std::cout << (*beg).first << " : " << (*beg).second << "\n";
                 ++beg;
-                //count++;
             }
             print_location_properties((*bg).getLocations());
+            print_error_pages((*bg).getErrorPages());
+            print_allow_meths((*bg).getAllowMethods());
             ++bg;
             std::cout << "end server config\n\n";
         }

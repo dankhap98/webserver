@@ -11,6 +11,7 @@ class ConfigLocation
         std::string url;
         std::map<std::string, std::string> props;
         std::vector<ConfigLocation> sub_locations;
+        std::vector<std::string> allow_methods;
    
     public:
         typedef  std::map<std::string, std::string> props_type;
@@ -25,11 +26,13 @@ class ConfigLocation
 
         props_type  getProps();
         std::string getUrl();
+        std::vector<std::string>    getAllowMethods();
         void        setUrl(const std::string& path);
         sub_loc_type    get_SubLocations();
         void     setProperty(std::string name, std::string value);
         std::string getProperty(std::string);
         void     setLocation(ConfigLocation cl);
+        void     addAllowMethod(std::string meth);
 };
 
 #endif

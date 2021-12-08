@@ -5,6 +5,7 @@
 
 #include "Request.hpp"
 #include "Response.hpp"
+#include "ConfigServer.hpp"
 
 #define SERVER_PORT  8080
 
@@ -22,6 +23,7 @@ class Webserver
         fd_set  write_set;
         fd_set  master_set;
         fd_set  working_set;
+        ConfigServer    *cs;
 
         Webserver(const Webserver& w);
         Webserver();
@@ -35,11 +37,11 @@ class Webserver
         Request &parse_request(std::string request);
 
     public:
-        Webserver(int port);
+        Webserver(ConfigServer& cs);
+        //Webserver(int port);
         ~Webserver();
 
         void    start();
-
 };
 
 #endif

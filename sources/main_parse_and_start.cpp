@@ -32,7 +32,8 @@ int    main()
 
         while(bg != cs.end())
         {
-            sitems[i].wb = new Webserver((*bg).getPort());
+            //sitems[i].wb = new Webserver((*bg).getPort());
+            sitems[i].wb = new Webserver((*bg));
             pthread_create(&threads[i], NULL, start_server, (void *)(&sitems[i]));
             ++bg;
             i++;

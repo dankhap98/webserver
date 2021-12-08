@@ -1,8 +1,8 @@
 #include "../includes/ConfigLocation.hpp"
 
-ConfigLocation::ConfigLocation(): url(""), props(), sub_locations() {}
+ConfigLocation::ConfigLocation(): url(""), props(), sub_locations(), allow_methods() {}
 
-ConfigLocation::ConfigLocation(std::string path): url(path), props(), sub_locations() {}
+ConfigLocation::ConfigLocation(std::string path): url(path), props(), sub_locations(), allow_methods() {}
 
 ConfigLocation::~ConfigLocation() {}
 
@@ -15,10 +15,12 @@ ConfigLocation & ConfigLocation::operator=(const ConfigLocation& cl)
 {
     this->props.clear();
     this->sub_locations.clear();
+    this->allow_methods.clear();
 
     this->props = std::move(cl.props);
     this->sub_locations = cl.sub_locations;
     this->url = cl.url;
+    this->allow_methods = cl.allow_methods;
 
     return *this;
 }
@@ -26,6 +28,11 @@ ConfigLocation & ConfigLocation::operator=(const ConfigLocation& cl)
 std::string     ConfigLocation::getUrl()
 {
     return this->url;
+}
+
+std::vector<std::string>        ConfigLocation::getAllowMethods()
+{
+    return  this->allow_methods;
 }
 
 void     ConfigLocation::setUrl(const std::string& path)
@@ -56,4 +63,9 @@ std::string ConfigLocation::getProperty(std::string name)
 void    ConfigLocation::setLocation(ConfigLocation cl)
 {
     this->sub_locations.push_back(cl);
+}
+
+void    ConfigLocation::addAllowMethod(std::string meth)
+{
+    this->allow_methods.push_back(meth);
 }

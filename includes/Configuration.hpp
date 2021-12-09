@@ -16,14 +16,15 @@ class Configuration
         Configuration(const Configuration& c);
         Configuration & operator=(const Configuration& c);
 
-        ConfigServer    loadServerConfig(std::ifstream& ifs);
+        ConfigServer    loadServerConfig(std::ifstream& ifs, int *is_exist);
         ConfigLocation    loadLocationConfig(std::ifstream& ifs);
 
         void    trim_line(std::string& line);
         void    parse_words(std::string line, std::vector<std::string>& words);
-        void    setServerAddress(ConfigServer *cs);
+        void    parseServerAddress(ConfigServer *cs);
         void    parse_long_prop(ConfigServer * cs, std::vector<std::string>& words);
         void    parse_long_prop(ConfigLocation * cl, std::vector<std::string>& words);
+        ConfigServer    *server_exist(std::vector<std::string>& words);
 
     public:
         Configuration();

@@ -49,6 +49,19 @@ void    print_error_pages(std::map<int, std::string> error_pages)
     }
 }
 
+void    print_config_struct(t_server_config conf)
+{
+    std::map<std::string, std::string>::iterator beg = conf.props.begin();
+    while (beg != conf.props.end())
+    {
+            std::cout << (*beg).first << " : " << (*beg).second << "\n";
+            ++beg;
+    }
+    print_location_properties(conf.locations);
+    print_error_pages(conf.error_pages);
+    print_allow_meths(conf.allow_methods);
+}
+
 int    main()
 {
     Configuration *conf = new Configuration("./test2.conf");
@@ -56,7 +69,6 @@ int    main()
 
     try{
         conf->loadConfig();
-
 
         std::vector<ConfigServer> cs = conf->getServers();
         std::vector<ConfigServer>::iterator bg = cs.begin();
@@ -66,7 +78,16 @@ int    main()
             std::cout << "ServerConfig\n";
             std::cout << "Address: " << (*bg).getAddress() << "\n";
             std::cout << "Port: " << (*bg).getPort() << "\n";
-            std::map<std::string, std::string> props = (*bg).getProps();
+            std::vector<t_server_config>    sconf = (*bg).getConfig();
+            std::vector<t_server_config>::iterator beg = sconf.begin();
+            while (beg != sconf.end())
+            {
+                std::cout << "CONFIG STRUCT:\n";
+                print_config_struct((*beg));
+                std::cout << "END CONFIG STRUCT\n";
+                ++beg;
+            }
+            /*std::map<std::string, std::string> props = (*bg).getConfig().props;
             std::map<std::string, std::string>::iterator beg = props.begin();
             while (beg != props.end())
             {
@@ -75,7 +96,7 @@ int    main()
             }
             print_location_properties((*bg).getLocations());
             print_error_pages((*bg).getErrorPages());
-            print_allow_meths((*bg).getAllowMethods());
+            print_allow_meths((*bg).getAllowMethods());*/
             ++bg;
             std::cout << "end server config\n\n";
         }

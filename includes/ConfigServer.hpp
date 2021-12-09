@@ -6,13 +6,18 @@
 #include <map>
 #include "ConfigLocation.hpp"
 
+typedef struct  s_server_config
+{
+    std::map<std::string, std::string> props;
+    std::map<int, std::string> error_pages;
+    std::vector<ConfigLocation> locations;
+    std::vector<std::string> allow_methods;
+}   t_server_config;
+
 class ConfigServer
 {
     private:
-        std::map<std::string, std::string> props;
-//        std::map<int, std::string> error_pages;
-        std::vector<ConfigLocation> locations;
-        std::vector<std::string> allow_methods;
+        std::vector<t_server_config> config;
         std::string ip_address;
         int port;
     
@@ -26,12 +31,12 @@ class ConfigServer
 
         ConfigServer(const ConfigServer& cs);
         ConfigServer & operator=(const ConfigServer& cs);
-        props_type getProps();
+        //props_type getProps();
         void     setProperty(std::string name, std::string value);
-        std::string     getProperty(std::string name);
+        /*std::string     getProperty(std::string name);
         loc_type getLocations();
         error_page_type getErrorPages();
-        std::vector<std::string>    getAllowMethods();
+        std::vector<std::string>    getAllowMethods();*/
         void     setLocation(ConfigLocation cl);
         void     setAddress(std::string addr);
         void     setPort(int server_port);
@@ -39,6 +44,8 @@ class ConfigServer
         void     addAllowMethod(std::string meth);
         std::string getAddress() const;
         int     getPort() const;
+        std::vector<t_server_config>    getConfig();
+        void        addConfig(t_server_config conf);
 };
 
 #endif

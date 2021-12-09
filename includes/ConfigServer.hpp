@@ -25,7 +25,6 @@ class ConfigServer
         typedef std::map<std::string, std::string> props_type;
         typedef std::map<int, std::string> error_page_type;
         typedef std::vector<ConfigLocation> loc_type;
-        std::map<int, std::string> error_pages;
         ConfigServer();
         ~ConfigServer();
 

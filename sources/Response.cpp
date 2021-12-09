@@ -10,10 +10,10 @@ Response::Response() {
 
 Response::Response(ConfigServer &config) {
 //    error_404 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header id=\"header\"><h1>404</h1></header></body></html>";
+    t_server_config conf = config.getConfig()[0];
     open_err = false;
-    error_404 = readHtml(config.error_pages[404]);
+    error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
-    std::cout<<config.error_pages[404]<<std::endl<<error_404<<std::endl;
 }
 
 Response::~Response() {

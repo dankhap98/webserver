@@ -7,10 +7,12 @@
 
 #include "server.hpp"
 #include "Request.hpp"
+#include "ConfigServer.hpp"
 
 class Response {
 public:
     Response();
+    Response(ConfigServer &config);
     ~Response();
 
     void            SetContentType();
@@ -28,6 +30,9 @@ private:
 
 
     std::string     error_404;
+    std::string     error_403;
+
+    bool            open_err;
 };
 
 

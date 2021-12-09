@@ -8,6 +8,14 @@ Response::Response() {
     error_404 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header id=\"header\"><h1>404</h1></header></body></html>";
 }
 
+Response::Response(ConfigServer &config) {
+//    error_404 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header id=\"header\"><h1>404</h1></header></body></html>";
+    open_err = false;
+    error_404 = readHtml(config.error_pages[404]);
+    error_403 = readHtml("403.html");
+    std::cout<<config.error_pages[404]<<std::endl<<error_404<<std::endl;
+}
+
 Response::~Response() {
 
 }
@@ -19,8 +27,11 @@ std::string		Response::readHtml(const std::string& path)
 
     file.open(path.c_str(), std::ifstream::in);
     if (file.is_open() == false)
+    {
+        open_err = true;
         return (error_404);
-
+    }
+    open_err = false;
     buffer << file.rdbuf();
     file.close();
     return (buffer.str());
@@ -53,9 +64,9 @@ void            Response::SetResponseMsg(Request &request)
     SetPath(request.getUrl());
     if (request.getMethod() == "GET")
         GETResponse();
-    if (request.getMethod() == "POST")
+    else if (request.getMethod() == "POST")
         POSTResponse();
-    if (request.getMethod() == "DELETE")
+    else if (request.getMethod() == "DELETE")
         remove(Path.c_str());
 }
 
@@ -65,12 +76,16 @@ void            Response::POSTResponse()
 void            Response::GETResponse()
 {
     SetContentType();
-    if (!(content_type.empty()))
-    {
-        Html_text = readHtml(Path);
+    Html_text = readHtml(Path);
+    if (!(content_type.empty()) && content_type != "no type")
         ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(Html_text.size()) + "\n\n" + Html_text;
-    }
+    else if (!(open_err))
+        ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+                      std::to_string(error_403.size()) + "\n\n" + error_403;
+    else
+        ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+                      std::to_string(Html_text.size()) + "\n\n" + Html_text;
 }
 
 void            Response::SetContentType()
@@ -87,6 +102,8 @@ void            Response::SetContentType()
         content_type = "text/php";
     else if (type == "jpeg" || type == "jpg")
         content_type = "image/jpeg";
+    else
+        content_type = "no type";
 }
 
 std::string     Response::GetResponseMsg() {return ResponseMsg;}

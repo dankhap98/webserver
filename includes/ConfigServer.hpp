@@ -10,7 +10,7 @@ class ConfigServer
 {
     private:
         std::map<std::string, std::string> props;
-        std::map<int, std::string> error_pages;
+//        std::map<int, std::string> error_pages;
         std::vector<ConfigLocation> locations;
         std::vector<std::string> allow_methods;
         std::string ip_address;
@@ -20,6 +20,7 @@ class ConfigServer
         typedef std::map<std::string, std::string> props_type;
         typedef std::map<int, std::string> error_page_type;
         typedef std::vector<ConfigLocation> loc_type;
+        std::map<int, std::string> error_pages;
         ConfigServer();
         ~ConfigServer();
 

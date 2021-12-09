@@ -1,6 +1,6 @@
 #include "../includes/ConfigServer.hpp"
 
-ConfigServer::ConfigServer(): props(), error_pages(), locations(), allow_methods(), ip_address(), port()
+ConfigServer::ConfigServer(): props(), locations(),  allow_methods(), ip_address(), port() ,error_pages()
 {
     this->error_pages[404] = "/";
     this->error_pages[403] = "/";

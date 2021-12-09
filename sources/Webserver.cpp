@@ -81,50 +81,14 @@ Webserver::Webserver(ConfigServer& conf_s)
         std::cerr << "Could not listen." << std::endl;
         exit(-1);
     }
-    else
-    {
+    else {
         FD_ZERO(&(master_set));
         max_sd = listen_sd;
         FD_SET(listen_sd, &master_set);
         std::cout << "Sever created!";
-        timeout.tv_sec  = 1;
+        timeout.tv_sec = 1;
         timeout.tv_usec = 0;
     }
-
-    //                          IPV6 VER
-
-//    int rc;
-//    int on = 1;
-//
-//   listen_sd = socket(AF_INET6, SOCK_STREAM, 0);
-//   check_errors(listen_sd, "socket() failed");
-//
-//   rc = setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR,
-//                   (char *)&on, sizeof(on));
-//   check_errors(rc, "setsockopt() failed", 1);
-//
-//   rc = ioctl(listen_sd, FIONBIO, (char *)&on);
-//   check_errors(rc, "ioctl() failed", 1);
-//
-//   memset(&(addr), 0, sizeof(addr));
-//   addr.sin6_family      = AF_INET6;
-//   memcpy(&(addr.sin6_addr), &in6addr_any, sizeof(in6addr_any));
-//   addr.sin6_port        = htons(port);
-//   rc = bind(listen_sd,
-//             (struct sockaddr *)&(addr), sizeof(addr));
-//   check_errors(rc, "bind() failed", 1);
-//
-//   rc = listen(listen_sd, 32);
-//   check_errors(rc, "listen() failed", 1);
-//
-//   FD_ZERO(&(master_set));
-//   max_sd = listen_sd;
-//   FD_SET(listen_sd, &master_set);
-//
-//   timeout.tv_sec  = 3 * 60;
-//   timeout.tv_usec = 0;
-//
-//   std::cout << "Server created\n";
 }
 
 Webserver::~Webserver() 
@@ -237,7 +201,7 @@ void    Webserver::accept_connections(int& end_server)
 void    Webserver::receive_data(int i, int& close_conn)
 {
     Request request;
-    Response response;
+    Response response(*cs);
     std::vector<char> buffer(5000);
     int rc;
 

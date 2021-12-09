@@ -16,6 +16,7 @@ void    Configuration::loadConfig()
     std::string line;
     std::vector<std::string> words;
     int multirow_flag = 0;
+    int is_exist = 0;
 
     conf_to_read.open(this->path);
     if (!conf_to_read.is_open())
@@ -29,9 +30,13 @@ void    Configuration::loadConfig()
             this->parse_words(line, words);
             if ((words[0] == "server" && words[1] == "{") || (words[0] == "{" && multirow_flag)) // "{" may be in next row
             {
-                ConfigServer new_server = this->loadServerConfig(conf_to_read);
-                this->setServerAddress(&new_server);
-                this->servers.push_back(new_server);
+                ConfigServer new_server = this->loadServerConfig(conf_to_read, &is_exist);
+                if (!is_exist)
+                {
+                    this->parseServerAddress(&new_server);
+                    this->servers.push_back(new_server);
+                }
+                is_exist = 0;
                 multirow_flag = 0;
             }
             else if (words[0] == "server")
@@ -43,14 +48,16 @@ void    Configuration::loadConfig()
     conf_to_read.close();
 }
 
-ConfigServer    Configuration::loadServerConfig(std::ifstream& conf)
+ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exist)
 {
     ConfigServer *cs = new ConfigServer();
+    ConfigServer *existed = 0;
     bool    server_parse_end = false;
     std::string line;
     std::string url;
     std::vector<std::string> words;
     int multirow_flag = 0;
+
 
     while (server_parse_end == false)
     {
@@ -80,6 +87,12 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf)
             }
             else
             {
+                if (words[0] == "listen")
+                {
+                    existed = server_exist(words);
+                    if (existed)
+                        *is_exist = 1;
+                }
                 if (words.size() == 2)
                     cs->setProperty(words[0], words[1]);
                 else if(words.size() == 1 && words[0] != "}")
@@ -93,6 +106,8 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf)
         }
         line.clear();
     }
+    if (*is_exist)
+        (*existed).addConfig((cs->getConfig())[0]);
     return *cs;
 }
 
@@ -184,10 +199,10 @@ std::vector<ConfigServer>   Configuration::getServers()
     return this->servers;
 }
 
-void    Configuration::setServerAddress(ConfigServer *cs)
+void    Configuration::parseServerAddress(ConfigServer *cs)
 {
     int pos = 0;
-    std::map<std::string, std::string> props = (*cs).getProps();
+    std::map<std::string, std::string> props = (*cs).getConfig()[0].props;
 
     if (props.find("listen") != props.end())
     {
@@ -232,4 +247,19 @@ void    Configuration::parse_long_prop(ConfigLocation * cl, std::vector<std::str
             cl->addAllowMethod(words[i]);
         }
     }
+}
+
+ConfigServer    *Configuration::server_exist(std::vector<std::string>& words) 
+{
+    if (this->servers.size() == 0)
+        return 0;
+    std::vector<ConfigServer>::iterator bg = this->servers.begin();
+    while (bg != this->servers.end())
+    {
+        std::vector<t_server_config> conf = (*bg).getConfig();
+        if (conf[0].props["listen"] == words[1])
+            return &(*bg);
+        ++bg;
+    }
+    return (0);
 }

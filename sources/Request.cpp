@@ -4,6 +4,10 @@ Request::Request(): _method(), _headers(), _params(), _body() {}
 
 Request::~Request() {}
 
+std::map<std::string, std::string> Request::getParams() const{
+    return this->_params;
+}
+
 std::string Request::getMethod() const
 {
     return this->_method;

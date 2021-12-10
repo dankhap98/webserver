@@ -15,9 +15,12 @@ void    *start_server(void *args)
     return (0);
 }
 
-int    main()
+int    main(int argc, char  **argv)
 {
-    Configuration *conf = new Configuration("./test2.conf");
+    std::string filename = "./test2.conf";
+    if (argc == 2)
+        filename = argv[1];
+    Configuration *conf = new Configuration(filename);
     
 
     try{

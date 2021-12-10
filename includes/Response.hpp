@@ -2,8 +2,8 @@
 // Created by Stoops Ysilla on 12/7/21.
 //
 
-#ifndef WEBSERVER_RESPONSE_HPP
-#define WEBSERVER_RESPONSE_HPP
+#ifndef RESPONSE_HPP
+#define RESPONSE_HPP
 
 #include "server.hpp"
 #include "Request.hpp"
@@ -20,6 +20,7 @@ public:
     void            SetPath(std::string url);
     void            GETResponse();
     void            POSTResponse();
+    void            DELETEResponse();
     std::string		readHtml(const std::string& path);
     std::string     GetResponseMsg();
 private:
@@ -31,6 +32,7 @@ private:
 
     std::string     error_404;
     std::string     error_403;
+    std::string     error_204;
 
     bool            open_err;
 };

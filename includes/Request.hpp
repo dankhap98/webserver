@@ -19,6 +19,8 @@ class Request
 
         std::string getMethod() const;
         std::string getUrl() const;
+        std::map<std::string, std::string>  getParams() const;
+//        std::map<std::string, std::string>  getHeader();
         void    setMethod(std::string method);
         void    setUrl(std::string url);
         void    setStatus(std::string status);

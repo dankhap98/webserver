@@ -2,8 +2,8 @@
 // Created by Stoops Ysilla on 12/6/21.
 //
 
-#ifndef WEBSRV_SERVER_HPP
-#define WEBSRV_SERVER_HPP
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 //#include <cstdio>
 #include <cstdlib> // For exit() and EXIT_FAILURE
@@ -16,6 +16,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <errno.h>
 
@@ -23,5 +24,7 @@
 
 #define TRUE             1
 #define FALSE            0
+
+int    file_exist(std::string path);
 
 #endif //WEBSRV_SERVER_HPP

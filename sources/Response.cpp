@@ -14,6 +14,7 @@ Response::Response(ConfigServer &config) {
     open_err = false;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
+    error_204 = readHtml("204.html");
 }
 
 Response::~Response() {
@@ -62,16 +63,23 @@ void            Response::SetResponseMsg(Request &request)
         return ;
     }
     SetPath(request.getUrl());
-    if (request.getMethod() == "GET")
-        GETResponse();
-    else if (request.getMethod() == "POST")
-        POSTResponse();
-    else if (request.getMethod() == "DELETE")
-        remove(Path.c_str());
+    if (file_exist(Path) > 0) {
+        if (request.getMethod() == "GET" && request.getParams().empty())
+            GETResponse();
+        else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
+            POSTResponse();
+        else if (request.getMethod() == "DELETE")
+            remove(Path.c_str());
+    }
+    else
+        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+                      std::to_string(error_404.size()) + "\n\n" + error_404;
 }
 
 void            Response::POSTResponse()
-{}
+{
+
+}
 
 void            Response::GETResponse()
 {
@@ -88,6 +96,22 @@ void            Response::GETResponse()
                       std::to_string(Html_text.size()) + "\n\n" + Html_text;
 }
 
+void            Response::DELETEResponse()
+{
+    if (file_exist(Path) > 0)
+    {
+        if (remove(Path.c_str()) == -1)
+            ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+                          std::to_string(error_403.size()) + "\n\n" + error_403;
+        else
+            ResponseMsg = "HTTP/1.1 204 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+                          std::to_string(error_204.size()) + "\n\n" + error_204;
+    }
+    else
+        ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+                      std::to_string(error_404.size()) + "\n\n" + error_404;
+}
+
 void            Response::SetContentType()
 {
     std::string type;
@@ -100,6 +124,8 @@ void            Response::SetContentType()
         content_type = "text/javascript";
     else if (type == "php")
         content_type = "text/php";
+    else if (type == "mp4")
+        content_type = "video/mp4";
     else if (type == "jpeg" || type == "jpg")
         content_type = "image/jpeg";
     else

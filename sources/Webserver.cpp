@@ -70,6 +70,7 @@ Webserver::Webserver(ConfigServer& conf_s)
     memset((char *)&_addr, 0, sizeof(_addr));
     _addr.sin_family = AF_INET;
     _addr.sin_addr.s_addr = INADDR_ANY;
+    //_addr.sin_addr.s_addr = htonl(cs->getConfig()[0].props["server_name"].c_str());
     _addr.sin_port = htons(port);
     if (bind(listen_sd, (struct sockaddr *)&_addr, sizeof(_addr)) == -1)
     {

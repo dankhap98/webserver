@@ -45,6 +45,8 @@ class ConfigServer
         int     getPort() const;
         std::vector<t_server_config>    getConfig();
         void        addConfig(t_server_config conf);
+        t_server_config getConfigByName(std::string host);
+        ConfigLocation  getConfigLocationByUrl(t_server_config conf, std::string url);
 };
 
 #endif

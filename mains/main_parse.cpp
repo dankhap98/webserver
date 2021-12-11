@@ -87,19 +87,18 @@ int    main()
                 std::cout << "END CONFIG STRUCT\n";
                 ++beg;
             }
-            /*std::map<std::string, std::string> props = (*bg).getConfig().props;
-            std::map<std::string, std::string>::iterator beg = props.begin();
-            while (beg != props.end())
-            {
-                std::cout << (*beg).first << " : " << (*beg).second << "\n";
-                ++beg;
-            }
-            print_location_properties((*bg).getLocations());
-            print_error_pages((*bg).getErrorPages());
-            print_allow_meths((*bg).getAllowMethods());*/
-            ++bg;
             std::cout << "end server config\n\n";
+            /*t_server_config conf_test = (*bg).getConfigByName("localhost:8000");
+            std::cout << "GET CONF TEST. size: " << (*bg).getConfig().size() << "\n";
+            std::cout << conf_test.props["server_name"] <<  "\n";
+            std::cout << "________END OF TEST______\n";*/
+            ConfigLocation  cl = (*bg).getConfigLocationByUrl((*bg).getConfig()[0], "/directory/test");
+            std::cout << "GET LOC TEST. size: " << (*bg).getConfig()[0].locations.size() << "\n";
+            std::cout << cl.getUrl() <<  "\n";
+            std::cout << "________END OF TEST______\n";
+            ++bg;
         }
+        
     }
     catch(std::exception e)
     {

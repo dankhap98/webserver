@@ -117,3 +117,46 @@ void    ConfigServer::addConfig(t_server_config conf)
 {
     this->config.push_back(conf);
 }
+
+t_server_config ConfigServer::getConfigByName(std::string host)
+{
+    if (this->config.size() == 1)
+        return this->config[0];
+    std::vector<t_server_config>::iterator  bg = this->config.begin();
+    int pos = host.find(":");
+    std::string hostname = host.substr(0, pos);
+    //int port = std::atoi((host.substr(pos + 1, host.size() - pos)).c_str());
+
+    while (bg != this->config.end())
+    {
+        if (hostname == (*bg).props["server_name"])
+            return (*bg);
+        ++bg;
+    }
+    return this->config[0];
+}
+
+ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::string url)
+{
+    std::vector<ConfigLocation>::iterator bg = conf.locations.begin();
+
+    while (bg != conf.locations.end())
+    {
+        std::string loc_url = (*bg).getUrl();
+        if (loc_url == url || std::strncmp(loc_url.c_str(), url.c_str(), loc_url.size()) == 0)
+            return (*bg);
+        if (loc_url[0] == '*')
+        {
+            //TD not 0 index, must be i - index
+            loc_url = loc_url.substr(1, loc_url.size() - 1);
+            if (std::count(url.begin(), url.end(), '/') == 1)
+            {
+                if (loc_url == url.substr(url.size() - loc_url.size(), loc_url.size() - 1))
+                    return  (*bg);
+            }
+        }
+        //check regex *.bla
+        ++bg;
+    }
+    return  conf.locations[0]; //to think
+}

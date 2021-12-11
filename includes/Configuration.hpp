@@ -25,6 +25,7 @@ class Configuration
         void    parse_long_prop(ConfigServer * cs, std::vector<std::string>& words);
         void    parse_long_prop(ConfigLocation * cl, std::vector<std::string>& words);
         ConfigServer    *server_exist(std::vector<std::string>& words);
+        void    parse_listen(ConfigServer &cs, std::vector<std::string> listen);
 
     public:
         Configuration();

@@ -56,6 +56,7 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
     std::string line;
     std::string url;
     std::vector<std::string> words;
+    std::vector<std::string> listen;
     int multirow_flag = 0;
 
 
@@ -92,8 +93,9 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
                     existed = server_exist(words);
                     if (existed)
                         *is_exist = 1;
+                    listen.push_back(words[1]);
                 }
-                if (words.size() == 2)
+                else if (words.size() == 2)
                     cs->setProperty(words[0], words[1]);
                 else if(words.size() == 1 && words[0] != "}")
                     cs->setProperty(words[0], "");
@@ -106,6 +108,7 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
         }
         line.clear();
     }
+    this->parse_listen(*cs, listen);
     if (*is_exist)
         (*existed).addConfig((cs->getConfig())[0]);
     return *cs;
@@ -206,9 +209,16 @@ void    Configuration::parseServerAddress(ConfigServer *cs)
 
     if (props.find("listen") != props.end())
     {
+        int port = 0;
+        std::string addr = "0.0.0.0";
         pos = props["listen"].find_first_of(":", pos);
-        std::string addr = props["listen"].substr(0, pos);
-        int port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size() - pos - 1)).c_str());
+        if ((size_t)pos == props["listen"].size())
+            port = std::atoi(props["listen"].c_str());
+        else
+        {
+            addr = props["listen"].substr(0, pos);
+            port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size() - pos - 1)).c_str());
+        }
         //need to check if addr or port is null
         //need to do many key = listen params exist 
         (*cs).setAddress(addr);
@@ -229,7 +239,7 @@ void    Configuration::parse_long_prop(ConfigServer * cs, std::vector<std::strin
     }
     else if(words[0] == "allow_methods")
     {
-        for (int i = 0; i < len; i++)
+        for (int i = 1; i < len; i++)
         {
             cs->addAllowMethod(words[i]);
         }
@@ -242,7 +252,7 @@ void    Configuration::parse_long_prop(ConfigLocation * cl, std::vector<std::str
 
     if(words[0] == "allow_methods")
     {
-        for (int i = 0; i < len; i++)
+        for (int i = 1; i < len; i++)
         {
             cl->addAllowMethod(words[i]);
         }
@@ -262,4 +272,26 @@ ConfigServer    *Configuration::server_exist(std::vector<std::string>& words)
         ++bg;
     }
     return (0);
+}
+
+void    Configuration::parse_listen(ConfigServer &cs, std::vector<std::string> listen)
+{
+    if (listen.size() == 0)
+        return ;
+        //error
+    else if(listen.size() == 1)
+         cs.setProperty("listen", listen[0]);
+    else
+    {
+        cs.setProperty("listen", listen[0]);
+        this->parseServerAddress(&cs);
+        for (size_t i=1; i < listen.size(); i++)
+        {
+            ConfigServer *csnew = new ConfigServer(cs);
+            csnew->setProperty("listen", listen[i]);
+            this->parseServerAddress(csnew);
+            csnew->setAddress(cs.getAddress());
+            this->servers.push_back(*csnew);
+        }
+    }
 }

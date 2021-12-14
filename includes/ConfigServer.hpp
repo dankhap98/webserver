@@ -47,6 +47,7 @@ class ConfigServer
         void        addConfig(t_server_config conf);
         t_server_config getConfigByName(std::string host);
         ConfigLocation  getConfigLocationByUrl(t_server_config conf, std::string url);
+        uint32_t    getIpAddressInt();
 };
 
 #endif

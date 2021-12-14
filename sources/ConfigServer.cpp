@@ -151,7 +151,8 @@ ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::
             loc_url = loc_url.substr(1, loc_url.size() - 1);
             if (std::count(url.begin(), url.end(), '/') == 1)
             {
-                if (loc_url == url.substr(url.size() - loc_url.size(), loc_url.size() - 1))
+                std::string tmp_url = url.substr(url.size() - loc_url.size(), loc_url.size());
+                if (loc_url == tmp_url)
                     return  (*bg);
             }
         }
@@ -159,4 +160,42 @@ ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::
         ++bg;
     }
     return  conf.locations[0]; //to think
+}
+
+uint32_t    ConfigServer::getIpAddressInt()
+{
+    int pos = 0;
+    int start = 0;
+    int res = 0;
+    int d = 24;
+    int bt = 0;
+    std::string ip = this->ip_address;
+    std::string::iterator beg = ip.begin();
+
+    if (std::count(ip.begin(), ip.end(), '.') != 3)
+        return (0);
+
+    while (beg != ip.end())
+    {
+        pos = ip.find_first_of(".", pos);
+        if (pos == -1)
+            pos = ip.size();
+        bt = std::atoi((ip.substr(start, pos - start)).c_str());
+        if (bt > 256)
+            return (0);
+        if (d == 0)
+            res += bt;
+        else
+            res += (bt << d);
+
+        if ((size_t)pos == ip.size())
+            beg = ip.end();
+        else
+            beg += pos + 1;
+        pos++;
+        start = pos;
+        d-=8;
+    }
+
+    return (res);
 }

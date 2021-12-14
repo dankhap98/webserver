@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PROJECT WEBSERVER</title>
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">-->
+    <link rel="stylesheet" href="bootstrap.min.css" type="text/css"/>
+</head>
+<body>
+{# панель меню #}
+
+    <input type="checkbox" id="nav-toggle" hidden> {# для вызова меню #}
+    <nav class="nav">
+        <label for="nav-toggle" class="nav-toggle" onclick></label> {# для испр. бага в IOS 6 #}
+        <h2 class="logo"><a href="../">Pintura</a></h2>
+        <ul>
+            <li><a href="../">Главная страница</a>
+            <li><a href="Traffic.mp4">Traffic video</a>
+            <li><a href="../materials/">Склад студии</a>
+            <li><a href="../clientslist/">Список клиентов</a>
+            <li><a href="#1">Список сотрудников</a>
+            <li><a href="#2">Финансы</a>
+            <li><a href="#3">Вложения</a>
+            <li><a href="#4">Справочники</a>
+            <li><a href="#5">Настройки</a>
+        </ul>
+    </nav>
+    <img src="P.jpeg" alt="альтернативный текст">
+    <div class="mask-content"></div> {# для затемнения фона при вызове меню #}
+
+    {# заголовок уровня 1 #}
+    <header id="header">
+        <h1>{% block h1_name %}{% endblock %}</h1>
+    </header>
+
+    {# область панели управления #}
+    <div class="button" id="MyFormPanel">
+        {% block btn_panel %}{% endblock %}
+    </div>
+
+    <form method="POST">
+ 
+        First Name: <input type="text" name="first_name" /> <br />
+        Last Name: <input type="text" name="last_name" /> <br />
+         
+        <input type="submit" name="action" value="Submit" />
+         
+    </form>
+    <div>
+        <h2>Comments</h2>
+        <ul>
+            <li>First comment</li>
+
+        </ul>
+    </div>
+</body>
+</html>

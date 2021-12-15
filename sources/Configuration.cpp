@@ -219,6 +219,8 @@ void    Configuration::parseServerAddress(ConfigServer *cs)
         {
             addr = props["listen"].substr(0, pos);
             port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size() - pos - 1)).c_str());
+            if (addr == "localhost")
+                addr = "0.0.0.0";
         }
         //need to check if addr or port is null
         //need to do many key = listen params exist 

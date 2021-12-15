@@ -108,7 +108,8 @@ void            Response::DELETEResponse()
                           std::to_string(error_204.size()) + "\n\n" + error_204;
     }
     else
-        ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type +
+				"\nContent-Length:  " +
                       std::to_string(error_404.size()) + "\n\n" + error_404;
 }
 

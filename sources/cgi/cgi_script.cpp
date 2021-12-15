@@ -4,8 +4,10 @@
 
 #include "../../includes/server.hpp"
 
-int main()
+int main1()
 {
+	int ac;
+	char **av;
     if (ac > 1) {
         std::ofstream		file;
         std::stringstream	buffer;

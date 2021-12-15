@@ -4,7 +4,8 @@ Configuration::Configuration(): path(""), servers() {}
 
 Configuration::Configuration(std::string filepath): path(filepath), servers() {}
 
-Configuration::~Configuration() {}
+Configuration::~Configuration() {
+}
 
 void    Configuration::setPath(const std::string& filepath) {
     this->path = filepath;

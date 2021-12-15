@@ -8,6 +8,15 @@ std::map<std::string, std::string> Request::getParams() const{
     return this->_params;
 }
 
+std::map<std::string, std::string> Request::getHeader() const{
+    return this->_headers;
+}
+
+std::string Request::getBody() const
+{
+    return this->_body;
+}
+
 std::string Request::getMethod() const
 {
     return this->_method;
@@ -16,6 +25,11 @@ std::string Request::getMethod() const
 std::string Request::getUrl() const
 {
     return this->_url;
+}
+
+std::string Request::getQuery() const
+{
+    return this->Query;
 }
         
 void    Request::setMethod(std::string method)
@@ -145,6 +159,7 @@ void    Request::parseRequest(std::string request)
         if (npos != -1)
         {
             std::string params_row = getUrl().substr(npos + 1, getUrl().size() - npos - 1);
+            Query = params_row;
             start = 0;
             while (true)
             {

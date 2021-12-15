@@ -11,16 +11,19 @@ class Request
        std::string  _status;
        std::map<std::string, std::string> _headers;
        std::map<std::string, std::string> _params;
-       std::string  _body; 
+       std::string  _body;
+       std::string  Query;
 
     public:
         Request();
         ~Request();
 
+        std::string getBody() const;
         std::string getMethod() const;
         std::string getUrl() const;
+        std::string getQuery() const;
         std::map<std::string, std::string>  getParams() const;
-//        std::map<std::string, std::string>  getHeader();
+        std::map<std::string, std::string>  getHeader() const;
         void    setMethod(std::string method);
         void    setUrl(std::string url);
         void    setStatus(std::string status);

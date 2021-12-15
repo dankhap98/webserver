@@ -78,30 +78,30 @@ void            Response::SetResponseMsg(Request &request)
 
 void            Response::POSTResponse()
 {
-    int		fd[2];
-    pid_t	pid;
-    int		status = 0;
-    int		fdd = 0;
+//    int		fd[2];
+//    pid_t	pid;
+//    int		status = 0;
+//    int		fdd = 0;
 
     if (TRUE)           //проверка на наличие cgi в конфиге
         ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(error_404.size()) + "\n\n" + error_404;
-    else
-    {
-        pipe(fd);
-        switch (pid = fork()) {
-            case -1:
-                perror("fork");
-                exit(1);
-            case 0:
-                pid_zero("cgi/cgi.cgi", fdd, fd);
-            default:
-                pid_nonzero(status, fd);
-                if (fdd != NULL)
-                    close(fdd);
-                fdd = fd[0];
-        }
-    }
+//    else
+//    {
+//        pipe(fd);
+//        switch (pid = fork()) {
+//            case -1:
+//                perror("fork");
+//                exit(1);
+//            case 0:
+//                pid_zero("cgi/cgi.cgi", fdd, fd);
+//            default:
+//                pid_nonzero(status, fd);
+//                if (fdd != NULL)
+//                    close(fdd);
+//                fdd = fd[0];
+//        }
+//    }
 }
 
 void            Response::GETResponse()

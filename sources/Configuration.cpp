@@ -51,7 +51,7 @@ void    Configuration::loadConfig()
 
 ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exist)
 {
-    ConfigServer *cs = new ConfigServer();
+    ConfigServer    cs;
     ConfigServer *existed = 0;
     bool    server_parse_end = false;
     std::string line;
@@ -59,7 +59,6 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
     std::vector<std::string> words;
     std::vector<std::string> listen;
     int multirow_flag = 0;
-
 
     while (server_parse_end == false)
     {
@@ -79,7 +78,7 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
                 }
                 else
                     new_loc.setUrl(words[1]);
-                cs->setLocation(new_loc);
+                cs.setLocation(new_loc);
                 multirow_flag = 0;
             }
             else if (words[0] == "location")
@@ -89,7 +88,7 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
             }
             else
             {
-                if (words[0] == "listen")
+                if (words[0] == "listen" && words.size() == 2)
                 {
                     existed = server_exist(words);
                     if (existed)
@@ -97,27 +96,28 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
                     listen.push_back(words[1]);
                 }
                 else if (words.size() == 2)
-                    cs->setProperty(words[0], words[1]);
+                    cs.setProperty(words[0], words[1]);
                 else if(words.size() == 1 && words[0] != "}")
-                    cs->setProperty(words[0], "");
+                    cs.setProperty(words[0], "");
                 else if(words[0] == "}")
                     server_parse_end = true;
                 else if (words.size() > 2)
-                    this->parse_long_prop(cs, words);
+                    this->parse_long_prop(&cs, words);
             }
             words.clear();
         }
         line.clear();
     }
-    this->parse_listen(*cs, listen);
+    this->parse_listen(cs, listen);
     if (*is_exist)
-        (*existed).addConfig((cs->getConfig())[0]);
-    return *cs;
+        (*existed).addConfig((cs.getConfig())[0]);
+    listen.clear();
+    return cs;
 }
 
 ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
 {
-    ConfigLocation *cl = new ConfigLocation();
+    ConfigLocation cl;
     bool    loc_parse_end = false;
     std::string line;
     std::string url;
@@ -141,7 +141,7 @@ ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
                     url.clear();
                 }
                 new_loc.setUrl(words[1]);
-                cl->setLocation(new_loc);
+                cl.setLocation(new_loc);
                 multirow_flag = 0;
             }
             else if(words[0] == "location")
@@ -152,20 +152,19 @@ ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
             else
             {
                 if (words.size() == 2)
-                    cl->setProperty(words[0], words[1]);
+                    cl.setProperty(words[0], words[1]);
                 else if(words.size() == 1 && words[0] != "}")
-                    cl->setProperty(words[0], "");
+                    cl.setProperty(words[0], "");
                 else if(words[0] == "}")
                     loc_parse_end = true;
                 else if(words.size() > 2)
-                    this->parse_long_prop(cl, words);
-
+                    this->parse_long_prop(&cl, words);
             }
             words.clear();
         }
         line.clear();
     }
-    return *cl;
+    return cl;
 }
 
 void    Configuration::trim_line(std::string& line)
@@ -295,6 +294,7 @@ void    Configuration::parse_listen(ConfigServer &cs, std::vector<std::string> l
             this->parseServerAddress(csnew);
             csnew->setAddress(cs.getAddress());
             this->servers.push_back(*csnew);
+            delete csnew;
         }
     }
 }

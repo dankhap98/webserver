@@ -67,7 +67,7 @@ void            Response::SetResponseMsg(Request &request)
         if (request.getMethod() == "GET" && request.getParams().empty())
             GETResponse();
         else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
-            POSTResponse();
+            POSTResponse(request);
         else if (request.getMethod() == "DELETE")
             remove(Path.c_str());
     }
@@ -76,16 +76,18 @@ void            Response::SetResponseMsg(Request &request)
                       std::to_string(error_404.size()) + "\n\n" + error_404;
 }
 
-void            Response::POSTResponse()
+void            Response::POSTResponse(Request  &request)
 {
 //    int		fd[2];
 //    pid_t	pid;
 //    int		status = 0;
 //    int		fdd = 0;
 
-    if (TRUE)           //проверка на наличие cgi в конфиге
-        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
-                      std::to_string(error_404.size()) + "\n\n" + error_404;
+    CGIClass cgi(request);
+
+//    if (TRUE)           //проверка на наличие cgi в конфиге
+//        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+//                      std::to_string(error_404.size()) + "\n\n" + error_404;
 //    else
 //    {
 //        pipe(fd);
@@ -131,7 +133,8 @@ void            Response::DELETEResponse()
                           std::to_string(error_204.size()) + "\n\n" + error_204;
     }
     else
-        ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type +
+				"\nContent-Length:  " +
                       std::to_string(error_404.size()) + "\n\n" + error_404;
 }
 

@@ -2,14 +2,15 @@
 // Created by Stoops Ysilla on 12/15/21.
 //
 
-#include "CGIClass.hpp"
+#include "../../includes/CGIClass.hpp"
 
 CGIClass::CGIClass() {
 
 }
 
 CGIClass::~CGIClass() {
-
+	delete RequestEnviromentForExec;
+	double argv;
 }
 
 CGIClass::CGIClass(Request &request) {
@@ -21,10 +22,11 @@ CGIClass::CGIClass(Request &request) {
 
 void    CGIClass::SetEviroment(Request &request)
 {
+	RequestEnviromentForExec = new char *[9];
 //    RequestEnviroment["AUTH_TYPE"] = "";
     RequestEnviroment["CONTENT_LENGTH"] = request.getBody().length();
     RequestEnviroment["CONTENT_TYPE"] = request.getHeader()["Content-Type"];
-    RequestEnviroment["GATEWAY_INTERFACE"] = "CGI/1.1"
+    RequestEnviroment["GATEWAY_INTERFACE"] = "CGI/1.1";
     RequestEnviroment["PATH_INFO"] = request.getUrl();
     RequestEnviroment["PATH_TRANSLATED"] = "/";
     RequestEnviroment["QUERY_STRING"] = request.getQuery(); //какой он будет при пост?
@@ -38,15 +40,24 @@ void    CGIClass::SetEviroment(Request &request)
 //    RequestEnviroment["SERVER_PORT"] =
     RequestEnviroment["SERVER_PROTOCOL"] = "HTTP/1.1";
 //    RequestEnviroment["SERVER_SOFTWARE"] =
+	std::map<std::string, std::string>::iterator it = RequestEnviroment.begin();
+	for (int i = 0; i < 9; i++, it++)
+		RequestEnviromentForExec[i] = strdup((it->first + "=" + it->second).c_str());
 }
 
 void    CGIClass::SetArguments(Request &request)
 {
-    int i = 0;
-    argv[0][] = "/cgi/cgi_tester";
-    for (auto it = request.getParams().begin(); it != request.getParams().end(), it++)
-    {
-        i++;
-        argv[i][] = it->second.c_str();
-    }
+	int i = 1;
+	std::map<std::string, std::string>::iterator it = request.getParams().begin();
+	std::map<std::string, std::string>::iterator end = request.getParams().end();
+	while (it != end)
+	{
+		i++;
+		it++;
+	}
+	it = request.getParams().begin();
+	argv = new char *[i];
+	argv[0] = strdup("/cgi/cgi.cgi");
+	for (int iter = 1; iter != i; iter++)
+		argv[i] = strdup(it->second.c_str());
 }

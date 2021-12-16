@@ -5,8 +5,8 @@
 #ifndef WEBSERVER_CGICLASS_H
 #define WEBSERVER_CGICLASS_H
 
-#include "../../includes/server.hpp"
-#include "../../includes/Request.hpp"
+#include "server.hpp"
+#include "Request.hpp"
 
 class CGIClass {
 public:
@@ -23,6 +23,7 @@ private:
     std::string RequestBody;
     std::map<std::string, std::string> RequestHeader;
     std::map<std::string, std::string> RequestEnviroment;
+	char **RequestEnviromentForExec;
     char **argv;
 };
 

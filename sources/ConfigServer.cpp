@@ -88,7 +88,7 @@ void    ConfigServer::setPort(int server_port)
 
 void    ConfigServer::setErrorPage(int code, std::string url)
 {
-    this->config[0].error_pages[code] = url;
+    this->config[0].error_pages[code] = this->getErrorUrl(code, url);
     //this->error_pages[code] = url;
 }
 
@@ -198,4 +198,19 @@ uint32_t    ConfigServer::getIpAddressInt()
     }
 
     return (res);
+}
+
+std::string     ConfigServer::getErrorUrl(int code, std::string url)
+{
+    int q = code % 10;
+    int d = ((code - q) / 10) % 10;
+    int h = code / 100;
+    int pos = 0;
+    if (std::count(url.begin(), url.end(), 'x') != 0)
+    {
+        pos = url.find_first_of("x", 0);
+        if (url[pos + 1] == '.' && url[pos - 1] == (std::to_string(d))[0] && url[pos - 2] == (std::to_string(h))[0])
+            url[pos] =  (std::to_string(q))[0];
+    }
+    return url;
 }

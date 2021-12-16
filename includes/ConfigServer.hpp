@@ -20,6 +20,8 @@ class ConfigServer
         std::vector<t_server_config> config;
         std::string ip_address;
         int port;
+
+        std::string     getErrorUrl(int code, std::string url);
     
     public:
         typedef std::map<std::string, std::string> props_type;

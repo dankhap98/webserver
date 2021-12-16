@@ -88,17 +88,18 @@ int    main()
                 ++beg;
             }
             std::cout << "end server config\n\n";
+
             /*t_server_config conf_test = (*bg).getConfigByName("localhost:8000");
             std::cout << "GET CONF TEST. size: " << (*bg).getConfig().size() << "\n";
             std::cout << conf_test.props["server_name"] <<  "\n";
-            std::cout << "________END OF TEST______\n";*/
-            /*ConfigLocation  cl = (*bg).getConfigLocationByUrl((*bg).getConfig()[0], "/test.bla");
+            std::cout << "________END OF TEST______\n";
+            ConfigLocation  cl = (*bg).getConfigLocationByUrl((*bg).getConfig()[0], "/test.bla");
             std::cout << "GET LOC TEST. size: " << (*bg).getConfig()[0].locations.size() << "\n";
             std::cout << cl.getUrl() <<  "\n";
-            std::cout << "________END OF TEST______\n";*/
+            std::cout << "________END OF TEST______\n";
             std::cout << "GET IP TEST. ip: " << (*bg).getAddress() << "\n";
             std::cout << (*bg).getIpAddressInt() <<  "\n";
-            std::cout << "________END OF TEST______\n";
+            std::cout << "________END OF TEST______\n";*/
             ++bg;
         }
         
@@ -107,4 +108,6 @@ int    main()
     {
         std::cout << e.what() << "\n";
     }
+
+    delete conf;
 }

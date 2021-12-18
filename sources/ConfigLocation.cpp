@@ -69,3 +69,33 @@ void    ConfigLocation::addAllowMethod(std::string meth)
 {
     this->allow_methods.push_back(meth);
 }
+
+ConfigLocation  ConfigLocation::getConfigSubLocationByUrl(std::string url)
+{
+    std::string loc_url = this->getUrl();
+    if (std::strncmp(loc_url.c_str(), url.c_str(), loc_url.size()) == 0)
+    {
+        std::string suburl = url.substr(loc_url.size(), url.size() - loc_url.size());
+        std::vector<ConfigLocation>::iterator bg = this->sub_locations.begin();
+
+        while (bg != this->sub_locations.end())
+        {
+            loc_url = (*bg).getUrl();
+            if (loc_url == suburl || std::strncmp(loc_url.c_str(), suburl.c_str(), loc_url.size()) == 0)
+                return (*bg);
+            if (loc_url[0] == '*')
+            {
+                //TD not 0 index, must be i - index
+                loc_url = loc_url.substr(1, loc_url.size() - 1);
+                if (std::count(suburl.begin(), suburl.end(), '/') == 1)
+                {
+                    std::string tmp_url = suburl.substr(suburl.size() - loc_url.size(), loc_url.size());
+                    if (loc_url == tmp_url)
+                        return  (*bg);
+                }
+            }
+            ++bg;
+        }
+    }
+    return  ConfigLocation(); //to think
+}

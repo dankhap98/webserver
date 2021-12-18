@@ -17,6 +17,16 @@ Response::Response(ConfigServer &config) {
     error_204 = readHtml("204.html");
 }
 
+Response::Response(ConfigServer &config, Request& req) {
+    std::cout << req.getHeader("Host") << "\n";
+    t_server_config conf = config.getConfigByName(req.getHeader("Host"));
+    open_err = false;
+    error_404 = readHtml(conf.error_pages[404]);
+    error_403 = readHtml("403.html");
+    error_204 = readHtml("204.html");
+    this->SetResponseMsg(req);
+}
+
 Response::~Response() {
 
 }

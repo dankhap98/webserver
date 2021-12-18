@@ -33,6 +33,7 @@ class ConfigLocation
         std::string getProperty(std::string);
         void     setLocation(ConfigLocation cl);
         void     addAllowMethod(std::string meth);
+        ConfigLocation  getConfigSubLocationByUrl(std::string url);
 };
 
 #endif

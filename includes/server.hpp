@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <unistd.h>
 
 #define SERVER_PORT  8080
 

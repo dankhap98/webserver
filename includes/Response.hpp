@@ -8,6 +8,7 @@
 #include "server.hpp"
 #include "Request.hpp"
 #include "ConfigServer.hpp"
+#include "CGIClass.hpp"
 
 class Response {
 public:
@@ -20,7 +21,7 @@ public:
     void            SetResponseMsg(Request &request);
     void            SetPath(std::string url);
     void            GETResponse();
-    void            POSTResponse();
+    void            POSTResponse(Request  &request);
     void            DELETEResponse();
     std::string		readHtml(const std::string& path);
     std::string     GetResponseMsg();

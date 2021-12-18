@@ -53,6 +53,8 @@ int    main(int argc, char  **argv)
     }
     catch(std::exception e)
     {
+        delete conf;
         std::cout << e.what() << "\n";
     }
+    delete conf;
 }

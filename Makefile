@@ -4,13 +4,13 @@ CC			=	clang++
 
 OBJS_DIR	=	.obj
 
-HEADERS		=	ConfigLocation.hpp ConfigServer.hpp Configuration.hpp Request.hpp Response.hpp server.hpp Webserver.hpp
+HEADERS		=	ConfigLocation.hpp ConfigServer.hpp Configuration.hpp Request.hpp Response.hpp server.hpp Webserver.hpp CGIClass.hpp
 
 HEADER	=		$(addprefix includes/, $(HEADERS))
 
 CFLAGS	=   	#-Wall -Wextra -Werror -std=c++98 -pedantic
 
-SRC		=		cgi/cgi_script ConfigLocation ConfigServer Configuration main_parse_and_start Request Response server Webserver
+SRC		=		cgi/CGIClass ConfigLocation ConfigServer Configuration main_parse_and_start Request Response server Webserver
 
 SRSUF	=		$(addsuffix .cpp, $(SRC))
 

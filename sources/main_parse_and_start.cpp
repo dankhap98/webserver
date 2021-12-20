@@ -21,11 +21,9 @@ int    main(int argc, char  **argv)
     if (argc == 2)
         filename = argv[1];
     Configuration *conf = new Configuration(filename);
-    
 
     try{
         conf->loadConfig();
-
 
         std::vector<ConfigServer> cs = conf->getServers();
         std::vector<ConfigServer>::iterator bg = cs.begin();

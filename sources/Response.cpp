@@ -92,7 +92,7 @@ void            Response::POSTResponse(Request  &request)
     CGIClass cgi(request);
 	Html_text = cgi.startCGI(readHtml(Path));
 	std::cout<<Html_text;
-	ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length:  " + std::to_string(Html_text.size()) +
+	ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  " + std::to_string(Html_text.size()) +
 			"\n\n" + Html_text;
 
 }

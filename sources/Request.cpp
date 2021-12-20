@@ -8,9 +8,9 @@ std::map<std::string, std::string> Request::getParams() const{
     return this->_params;
 }
 
-std::map<std::string, std::string> Request::getHeader() const{
-    return this->_headers;
-}
+//std::map<std::string, std::string> Request::getHeader() const{
+//    return this->_headers;
+//}
 
 std::string Request::getBody() const
 {

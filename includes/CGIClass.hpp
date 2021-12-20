@@ -14,7 +14,7 @@ public:
     CGIClass(Request &request);
     ~CGIClass();
 
-    char*    startCGI(std::string Page);
+    char*  startCGI(std::string Page);
 
 private:
     void    SetEviroment(Request &request);

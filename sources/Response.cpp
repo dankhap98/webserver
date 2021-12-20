@@ -84,6 +84,10 @@ void            Response::POSTResponse(Request  &request)
 //    int		fdd = 0;
 
     CGIClass cgi(request);
+	Html_text = cgi.startCGI(readHtml(Path));
+	std::cout<<Html_text;
+	ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length:  " + std::to_string(Html_text.size()) +
+			"\n\n" + Html_text;
 
 //    if (TRUE)           //проверка на наличие cgi в конфиге
 //        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +

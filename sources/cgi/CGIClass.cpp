@@ -47,17 +47,81 @@ void    CGIClass::SetEviroment(Request &request)
 
 void    CGIClass::SetArguments(Request &request)
 {
-	int i = 1;
-	std::map<std::string, std::string>::iterator it = request.getParams().begin();
-	std::map<std::string, std::string>::iterator end = request.getParams().end();
-	while (it != end)
+//	int i = 1;
+//	std::map<std::string, std::string>::iterator it = request.getParams().begin();
+//	std::map<std::string, std::string>::iterator end = request.getParams().end();
+//	while (it != end)
+//	{
+//		std::cout<< (*it).first << " " << (*it).second << "\n";
+//		std::cout<<it->second<<std::endl;
+//		i++;
+//		std::cout<<"fiasko\n";
+//		it++;
+//		std::cout<<"fiasko\n";
+//	}
+//	it = request.getParams().begin();
+	argv = new char *[2];
+	argv[0] = strdup("/cgi/cgi_tester");
+//	for (int iter = 1; iter != i; iter++)
+//		argv[i] = strdup(it->second.c_str());
+	argv[1] = strdup("test.html");
+}
+
+void 	CGIClass::RunCGI()
+{
+	if (!execve(argv[0], argv, RequestEnviromentForExec))
 	{
-		i++;
-		it++;
+		std::cerr<<"GG";
+		exit(1);
 	}
-	it = request.getParams().begin();
-	argv = new char *[i];
-	argv[0] = strdup("/cgi/cgi.cgi");
-	for (int iter = 1; iter != i; iter++)
-		argv[i] = strdup(it->second.c_str());
+}
+
+char*		CGIClass::startCGI(std::string Page)
+{
+	pid_t pid;
+	int fdStdInPipe[2], fdStdOutPipe[2];
+	fdStdInPipe[0] = fdStdInPipe[1] = fdStdOutPipe[0] = fdStdOutPipe[1] = -1;
+	if (pipe(fdStdInPipe) != 0 || pipe(fdStdOutPipe) != 0)
+	{
+		std::cerr << "Cannot create CGI pipe\n";
+		exit(1);
+	}
+
+	int fdOldStdIn = dup(fileno(stdin));
+	int fdOldStdOut = dup(fileno(stdout));
+
+	if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
+		exit(1);
+	close(fdStdInPipe[0]);
+	close(fdStdOutPipe[1]);
+
+	pid = fork();
+	if (pid < 0)
+		exit(1);
+	else if (!pid)
+	{
+		if (!execve(argv[0], argv, RequestEnviromentForExec))
+		{
+			std::cerr << "GG";
+			exit(1);
+		}
+	}
+	dup2(fdOldStdIn, fileno(stdin));
+	dup2(fdOldStdOut, fileno(stdout));
+	RequestBody = Page;
+	write(fdStdInPipe[1], RequestBody.c_str(), RequestBody.length());
+
+	while (1)
+	{
+		int n = read(fdStdOutPipe[0], bufferOut, 100000);
+		if (n > 0)
+		{
+			fwrite(bufferOut, 1, n, stdout);
+			fflush(stdout);
+		}
+		if (waitpid(pid, &status, WNOHANG) > 0)
+			break;
+	}
+	std::cout<<"--------------abaoba-------------\n"<<bufferOut;
+	return (bufferOut);
 }

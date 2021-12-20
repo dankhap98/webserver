@@ -14,17 +14,21 @@ public:
     CGIClass(Request &request);
     ~CGIClass();
 
-    int     startCGI();
+    char*    startCGI(std::string Page);
 
 private:
     void    SetEviroment(Request &request);
     void    SetArguments(Request &request);
 
+	void	RunCGI();
+
+	int 		status;
     std::string RequestBody;
     std::map<std::string, std::string> RequestHeader;
     std::map<std::string, std::string> RequestEnviroment;
 	char **RequestEnviromentForExec;
     char **argv;
+	char bufferOut[100000];
 };
 
 

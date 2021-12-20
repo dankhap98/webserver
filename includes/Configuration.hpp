@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <stdexcept>
 #include "ConfigServer.hpp"
 #include "ConfigLocation.hpp"
 
@@ -19,6 +20,7 @@ class Configuration
         ConfigServer    loadServerConfig(std::ifstream& ifs, int *is_exist);
         ConfigLocation    loadLocationConfig(std::ifstream& ifs);
 
+        bool    valid_file_name();
         void    trim_line(std::string& line);
         void    parse_words(std::string line, std::vector<std::string>& words);
         void    parseServerAddress(ConfigServer *cs);
@@ -41,6 +43,15 @@ class Configuration
                 virtual const   char* what() const throw()
                 {
                     return  ("Unable to open config file!");
+                }
+        };
+
+        class InvalidFileNameException: public std::exception
+        {
+            public:
+                virtual const   char* what() const throw()
+                {
+                    return  ("Invalid file name!");
                 }
         };
 

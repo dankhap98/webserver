@@ -14,6 +14,7 @@ class Response {
 public:
     Response();
     Response(ConfigServer &config);
+    Response(ConfigServer &config, Request& req);
     ~Response();
 
     void            SetContentType();

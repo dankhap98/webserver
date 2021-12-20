@@ -32,6 +32,8 @@ class Request
         void    setBody(std::string content);
         void    parseRequest(std::string request);
         void    show();
+        std::map<std::string, std::string>    getHeaders();
+        std::string    getHeader(std::string name);
 };
 
 #endif

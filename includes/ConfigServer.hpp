@@ -22,6 +22,7 @@ class ConfigServer
         int port;
 
         std::string     getErrorUrl(int code, std::string url);
+        std::string     getRootFromLocation(ConfigLocation cl, std::string root);
     
     public:
         typedef std::map<std::string, std::string> props_type;
@@ -50,6 +51,7 @@ class ConfigServer
         t_server_config getConfigByName(std::string host);
         ConfigLocation  getConfigLocationByUrl(t_server_config conf, std::string url);
         uint32_t    getIpAddressInt();
+        std::string     getRootPath(std::string host, std::string url);
 };
 
 #endif

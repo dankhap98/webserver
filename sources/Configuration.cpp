@@ -19,9 +19,11 @@ void    Configuration::loadConfig()
     int multirow_flag = 0;
     int is_exist = 0;
 
+    if (!this->valid_file_name())
+        throw Configuration::InvalidFileNameException();
     conf_to_read.open(this->path);
     if (!conf_to_read.is_open())
-        throw   NoFileOpenException();
+        throw   Configuration::NoFileOpenException();
     while (std::getline(conf_to_read, line))
     {
         this->trim_line(line);
@@ -129,7 +131,7 @@ ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
         std::getline(conf, line);
         this->trim_line(line);
         
-        if (line[0] != '#')
+        if (line[0] != '#' && line.size() > 0)
         {
             this->parse_words(line, words);
             if ((words[0] == "location" && words[2] == "{") || (words[0] == "{" && multirow_flag))
@@ -297,4 +299,13 @@ void    Configuration::parse_listen(ConfigServer &cs, std::vector<std::string> l
             delete csnew;
         }
     }
+}
+
+bool    Configuration::valid_file_name()
+{
+    std::string pth = this->path;
+
+    if (pth.substr(pth.size() - 5, 5) == ".conf")
+        return (1);
+    return (0);
 }

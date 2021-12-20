@@ -125,7 +125,6 @@ t_server_config ConfigServer::getConfigByName(std::string host)
     std::vector<t_server_config>::iterator  bg = this->config.begin();
     int pos = host.find(":");
     std::string hostname = host.substr(0, pos);
-    //int port = std::atoi((host.substr(pos + 1, host.size() - pos)).c_str());
 
     while (bg != this->config.end())
     {
@@ -159,7 +158,7 @@ ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::
         //check regex *.bla
         ++bg;
     }
-    return  conf.locations[0]; //to think
+    return  ConfigLocation(); //to think
 }
 
 uint32_t    ConfigServer::getIpAddressInt()
@@ -213,4 +212,35 @@ std::string     ConfigServer::getErrorUrl(int code, std::string url)
             url[pos] =  (std::to_string(q))[0];
     }
     return url;
+}
+
+std::string     ConfigServer::getRootFromLocation(ConfigLocation cl, std::string root)
+{
+    if (cl.getUrl().size() == 0)
+        return root;
+    else if (cl.getProperty("root").size() == 0)
+        root += cl.getUrl();
+    else
+        root = cl.getProperty("root");
+    return root;
+}
+
+std::string     ConfigServer::getRootPath(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::string root = conf.props["root"];
+    int lt_pos =  url.find_last_of("/");
+    std::string url_last = url.substr(lt_pos, url.size() - lt_pos);
+    
+    if (root.size() == 0)
+        root = "./";
+   
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    root = this->getRootFromLocation(cl, root);
+    ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+    root = this->getRootFromLocation(sub_cl, root);
+    
+    std::string ind =  root + url_last; //is dir? if not search index in root path TD
+
+    return root;
 }

@@ -178,3 +178,14 @@ void    Request::parseRequest(std::string request)
     if (npos != -1)
         setBody(request.substr(npos, request.size() - npos));
 }
+
+std::map<std::string, std::string>  Request::getHeaders()
+{
+    return this->_headers;
+}
+
+std::string     Request::getHeader(std::string name)
+{
+    return this->_headers[name];
+}
+

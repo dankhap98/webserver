@@ -88,23 +88,40 @@ int    main()
                 ++beg;
             }
             std::cout << "end server config\n\n";
+            //std::cout << "|___________________|\n";
 
-            /*t_server_config conf_test = (*bg).getConfigByName("localhost:8000");
+            t_server_config conf_test = (*bg).getConfigByName("localhost:8000");
             std::cout << "GET CONF TEST. size: " << (*bg).getConfig().size() << "\n";
             std::cout << conf_test.props["server_name"] <<  "\n";
             std::cout << "________END OF TEST______\n";
-            ConfigLocation  cl = (*bg).getConfigLocationByUrl((*bg).getConfig()[0], "/test.bla");
+            /*ConfigLocation  cl = (*bg).getConfigLocationByUrl((*bg).getConfig()[0], "/directory");
             std::cout << "GET LOC TEST. size: " << (*bg).getConfig()[0].locations.size() << "\n";
-            std::cout << cl.getUrl() <<  "\n";
+            if (cl.getUrl().size() != 0)
+                std::cout << cl.getUrl() <<  "\n";
+            else
+                std::cout << "in root\n";
             std::cout << "________END OF TEST______\n";
-            std::cout << "GET IP TEST. ip: " << (*bg).getAddress() << "\n";
+           
+            //print_location_properties((*cl).get_SubLocations());
+            if (cl.getUrl().size() != 0)
+            {
+                ConfigLocation  cl2 = cl.getConfigSubLocationByUrl("/directory/test");
+                std::cout << "GET SUB_LOC TEST. size: " << (cl.get_SubLocations()).size() << "\n";
+                if(cl2.getUrl().size() != 0)
+                    std::cout << cl2.getUrl() <<  "\n";
+                else
+                    std::cout << "in loc root\n";
+                std::cout << "________END OF TEST______\n";
+            }
+            std::cout << "sub_loc test 0\n";*/
+            /*std::cout << "GET IP TEST. ip: " << (*bg).getAddress() << "\n";
             std::cout << (*bg).getIpAddressInt() <<  "\n";
             std::cout << "________END OF TEST______\n";*/
             ++bg;
         }
         
     }
-    catch(std::exception e)
+    catch(std::exception& e)
     {
         std::cout << e.what() << "\n";
     }

@@ -60,6 +60,8 @@ void    ConfigServer::setProperty(std::string name, std::string value)
 {
     if (name == "allow_methods")
         this->addAllowMethod(value);
+    else if (name == "index")
+        this->addIndex(value);
     else
         this->config[0].props[name] = value;
         //this->props[name] = value;
@@ -89,13 +91,16 @@ void    ConfigServer::setPort(int server_port)
 void    ConfigServer::setErrorPage(int code, std::string url)
 {
     this->config[0].error_pages[code] = this->getErrorUrl(code, url);
-    //this->error_pages[code] = url;
 }
 
 void    ConfigServer::addAllowMethod(std::string meth)
 {
     this->config[0].allow_methods.push_back(meth);
-    //this->allow_methods.push_back(meth);
+}
+
+void    ConfigServer::addIndex(std::string ind_file)
+{
+    this->config[0].index.push_back(ind_file);
 }
 
 std::string ConfigServer::getAddress() const
@@ -214,14 +219,54 @@ std::string     ConfigServer::getErrorUrl(int code, std::string url)
     return url;
 }
 
-std::string     ConfigServer::getRootFromLocation(ConfigLocation cl, std::string root)
+std::string     ConfigServer::getRootFromLocation(ConfigLocation cl, std::string root, std::vector<std::string> *index)
 {
     if (cl.getUrl().size() == 0)
         return root;
     else if (cl.getProperty("root").size() == 0)
-        root += cl.getUrl();
+    {
+        //std::cout << "Location: " << cl.getUrl() << " no root\n";
+        std::map<std::string, std::string> props = cl.getProps();
+        std::map<std::string, std::string>::iterator t = props.find("alias");
+        if (t == props.end())
+        {
+            root += cl.getUrl();
+            //std::cout << "no alias\n";
+        }
+        else
+        {
+            root += cl.getProperty("alias");
+            //std::cout << "alias found\n";
+        }
+        //std::cout << root << "end func\n";
+    }
     else
-        root = cl.getProperty("root");
+    {
+        std::string root_prop = cl.getProperty("root");
+        std::map<std::string, std::string> props = cl.getProps();
+        std::map<std::string, std::string>::iterator t = props.find("alias");
+        //std::cout << "Location: " << cl.getUrl() << "root: " << root_prop << "\n";
+        if (t != props.end())
+        {
+            root += cl.getProperty("alias");
+            //std::cout << "alias found\n";
+        }
+        if (root_prop[0] == '.')
+        {
+            root = cl.getProperty("root");
+            //std::cout << "abs root path\n";
+        }
+        else if (root_prop[0] == '/')
+        {
+            root += root_prop;
+            //std::cout << "rel root path\n";
+        }
+        else
+            root = "./" + cl.getProperty("root");
+        //std::cout << root << " end func\n";
+    }
+    if (cl.getIndex().size() > 0)
+        *index = cl.getIndex();
     return root;
 }
 
@@ -229,18 +274,64 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
 {
     t_server_config conf  = this->getConfigByName(host);
     std::string root = conf.props["root"];
-    int lt_pos =  url.find_last_of("/");
-    std::string url_last = url.substr(lt_pos, url.size() - lt_pos);
+    std::ofstream   file;
+    std::vector<std::string> index = conf.index;
     
     if (root.size() == 0)
         root = "./";
+    
+    if (url == "/")
+    {
+        //std::cout << index.size() << "\n";
+        std::vector<std::string>::iterator bg1 = index.begin();
+        while (bg1 != index.end())
+        {
+            //std::cout << (*bg1) << "\n";
+            file.open((root + "/" + (*bg1)).c_str(),  std::ifstream::in);
+            if (file.is_open())
+            {
+                file.close();
+                return root + "/" + (*bg1);
+            }
+            ++bg1;
+        }
+        return root;
+    }
+        
    
     ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
-    root = this->getRootFromLocation(cl, root);
-    ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
-    root = this->getRootFromLocation(sub_cl, root);
-    
-    std::string ind =  root + url_last; //is dir? if not search index in root path TD
+    root = this->getRootFromLocation(cl, root, &index);
+    if (cl.getUrl().size() > 0)
+    {
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        root = this->getRootFromLocation(sub_cl, root, &index);
+        if (sub_cl.getUrl().size() > 0)
+            url = url.substr(sub_cl.getUrl().size(), url.size() - sub_cl.getUrl().size());
+    }
+    if (root[root.size() - 1] == '/')
+        url = url.substr(1, url.size() - 1);
+    file.open((root + url).c_str(),  std::ifstream::in);
+    if (file.is_open())
+    {
+        file.close();
+        return root + url;
+    }
+    else
+    {
+        root += url;
+        std::vector<std::string>::iterator bg = index.begin();
+        while (bg != index.end())
+        {
+            file.open((root + "/" + (*bg)).c_str(),  std::ifstream::in);
+            if (file.is_open())
+            {
+                file.close();
+                return root + "/" + (*bg);
+            }
+            ++bg;
+        }
+    }
 
     return root;
 }

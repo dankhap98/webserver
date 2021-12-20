@@ -18,12 +18,14 @@ Response::Response(ConfigServer &config) {
 }
 
 Response::Response(ConfigServer &config, Request& req) {
-    std::cout << req.getHeader("Host") << "\n";
+    //std::cout << req.getHeader("Host") << "\n";
     t_server_config conf = config.getConfigByName(req.getHeader("Host"));
     open_err = false;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
+    Path = config.getRootPath(req.getHeader("Host"), req.getUrl());
+    std::cout << Path << "\n";
     this->SetResponseMsg(req);
 }
 
@@ -72,7 +74,7 @@ void            Response::SetResponseMsg(Request &request)
         std::cerr<<"Request parsing error\n";
         return ;
     }
-    SetPath(request.getUrl());
+    //SetPath(request.getUrl());
     if (file_exist(Path) > 0) {
         if (request.getMethod() == "GET" && request.getParams().empty())
             GETResponse();

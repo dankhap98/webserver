@@ -35,6 +35,11 @@ std::vector<std::string>        ConfigLocation::getAllowMethods()
     return  this->allow_methods;
 }
 
+std::vector<std::string>        ConfigLocation::getIndex()
+{
+    return  this->index;
+}
+
 void     ConfigLocation::setUrl(const std::string& path)
 {
     this->url = path;
@@ -68,6 +73,11 @@ void    ConfigLocation::setLocation(ConfigLocation cl)
 void    ConfigLocation::addAllowMethod(std::string meth)
 {
     this->allow_methods.push_back(meth);
+}
+
+void    ConfigLocation::addIndex(std::string ind_file)
+{
+    this->index.push_back(ind_file);
 }
 
 ConfigLocation  ConfigLocation::getConfigSubLocationByUrl(std::string url)

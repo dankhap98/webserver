@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include "ConfigLocation.hpp"
+#include "server.hpp"
 
 typedef struct  s_server_config
 {
@@ -12,6 +13,7 @@ typedef struct  s_server_config
     std::map<int, std::string> error_pages;
     std::vector<ConfigLocation> locations;
     std::vector<std::string> allow_methods;
+    std::vector<std::string> index;
 }   t_server_config;
 
 class ConfigServer
@@ -22,7 +24,7 @@ class ConfigServer
         int port;
 
         std::string     getErrorUrl(int code, std::string url);
-        std::string     getRootFromLocation(ConfigLocation cl, std::string root);
+        std::string     getRootFromLocation(ConfigLocation cl, std::string root, std::vector<std::string> *index);
     
     public:
         typedef std::map<std::string, std::string> props_type;
@@ -43,6 +45,7 @@ class ConfigServer
         void     setAddress(std::string addr);
         void     setPort(int server_port);
         void     setErrorPage(int code, std::string url);
+        void     addIndex(std::string ind_file);
         void     addAllowMethod(std::string meth);
         std::string getAddress() const;
         int     getPort() const;

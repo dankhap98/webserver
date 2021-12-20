@@ -248,6 +248,13 @@ void    Configuration::parse_long_prop(ConfigServer * cs, std::vector<std::strin
             cs->addAllowMethod(words[i]);
         }
     }
+    else if(words[0] == "index")
+    {
+        for (int i = 1; i < len; i++)
+        {
+            cs->addIndex(words[i]);
+        }
+    }
 }
 
 void    Configuration::parse_long_prop(ConfigLocation * cl, std::vector<std::string>& words)
@@ -259,6 +266,13 @@ void    Configuration::parse_long_prop(ConfigLocation * cl, std::vector<std::str
         for (int i = 1; i < len; i++)
         {
             cl->addAllowMethod(words[i]);
+        }
+    }
+    else if(words[0] == "index")
+    {
+        for (int i = 1; i < len; i++)
+        {
+            cl->addIndex(words[i]);
         }
     }
 }

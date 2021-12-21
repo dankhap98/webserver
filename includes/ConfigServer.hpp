@@ -55,6 +55,7 @@ class ConfigServer
         ConfigLocation  getConfigLocationByUrl(t_server_config conf, std::string url);
         uint32_t    getIpAddressInt();
         std::string     getRootPath(std::string host, std::string url);
+        bool        getAutoIndex(std::string host, std::string url);
 };
 
 #endif

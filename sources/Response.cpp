@@ -25,7 +25,7 @@ Response::Response(ConfigServer &config, Request& req) {
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
     Path = config.getRootPath(req.getHeader("Host"), req.getUrl());
-    std::cout << Path << "\n";
+    //std::cout << Path << "\n";
     this->SetResponseMsg(req);
 }
 

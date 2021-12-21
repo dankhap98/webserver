@@ -335,3 +335,46 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
 
     return root;
 }
+
+
+bool    ConfigServer::getAutoIndex(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::string aindex = conf.props["autoindex"];
+    bool    is_on = true;
+
+    if (aindex.size() == 0 || aindex == "off")
+        is_on = false;
+    
+     if (url == "/")
+        return is_on;
+
+
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    if (cl.getUrl().size() > 0)
+    {
+        std::map<std::string, std::string> props = cl.getProps();
+        std::map<std::string, std::string>::iterator t = props.find("autoindex");
+        if (t != props.end())
+        {
+            if ((*t).second == "on")
+                is_on = true;
+            else
+                is_on = false;
+        }
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        if (sub_cl.getUrl().size() > 0)
+        {
+            std::map<std::string, std::string> s_props = sub_cl.getProps();
+            std::map<std::string, std::string>::iterator s_t = s_props.find("autoindex");
+            if (s_t != s_props.end())
+            {
+                if ((*s_t).second == "on")
+                    is_on = true;
+                else
+                    is_on = false;
+            }
+        }
+    }
+    return is_on;
+}

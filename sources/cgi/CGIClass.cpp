@@ -61,7 +61,7 @@ void    CGIClass::SetArguments(Request &request)
 //	}
 //	it = request.getParams().begin();
 	argv = new char *[2];
-	argv[0] = strdup("/cgi/cgi_tester");
+	argv[0] = strdup(("mdeep/" + RequestEnviroment["PATH_INFO"]).c_str());
 //	for (int iter = 1; iter != i; iter++)
 //		argv[i] = strdup(it->second.c_str());
 	argv[1] = strdup("test.html");
@@ -77,37 +77,49 @@ void 	CGIClass::RunCGI()
 }
 
 
-char*	CGIClass::startCGI(std::string Page)
+std::string	CGIClass::startCGI(Request &rec)
 {
 	pid_t pid;
-	int fd[2];
+	int fdIn[2], fdOut[2];
+	int fdOldIn, fdOldOut;
 
-	if (pipe(fd) != 0)
+	if ((pipe(fdIn) != 0 )|| (pipe(fdOut) != 0))
 	{
 		std::cerr << "Cannot create CGI pipe\n";
 		exit(1);
 	}
+//	fdOldIn = dup(fileno(stdin));
+//	fdOldOut = dup(fileno(stdout));
+	char b;
 	pid = fork();
 	if (pid == 0)
 	{
-		dup2(fd[1], 1);
-		dup2(fd[0], 0);
-		close(fd[0]);
-		close(fd[1]);
-		if (!execve(argv[0], argv, RequestEnviromentForExec))
-		{
-			std::cerr << "GG";
-			exit(1);
-		}
+		dup2(fdOut[1], 1);
+		dup2(fdIn[0], 0);
+
+		close(fdIn[1]);
+		close(fdOut[0]);
+		execve(argv[0], NULL, RequestEnviromentForExec);
+		close(fdIn[0]);
+		close(fdOut[1]);
+		exit(1);
 	}
 	else
 	{
-		dup2(fd[0], 0);
-//		write(fd[1], Page.c_str(), Page.length());
-		read(0, bufferOut, 100000);
+		close(fdIn[0]);
+		close(fdOut[1]);
+		RequestBody = rec.getParamsRaw();
+		write(fdIn[1], "addadada", 8);
+		close(fdIn[1]);
+		while (1)
+		{
+			if (waitpid(pid, &status, WNOHANG) > 0)
+				break;
+			read(fdOut[0], &b, 1);
+			bufferOut = bufferOut + b;
+		}
+		close(fdOut[0]);
 	}
-	close(fd[1]);
-	close(fd[0]);
 	return (bufferOut);
 }
 

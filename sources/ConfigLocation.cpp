@@ -16,11 +16,13 @@ ConfigLocation & ConfigLocation::operator=(const ConfigLocation& cl)
     this->props.clear();
     this->sub_locations.clear();
     this->allow_methods.clear();
+    this->index.clear();
 
     this->props = std::move(cl.props);
     this->sub_locations = cl.sub_locations;
     this->url = cl.url;
     this->allow_methods = cl.allow_methods;
+    this->index = cl.index;
 
     return *this;
 }
@@ -57,12 +59,17 @@ ConfigLocation::sub_loc_type    ConfigLocation::get_SubLocations()
 
 void    ConfigLocation::setProperty(std::string name, std::string value)
 {
-    this->props[name] = value;
+    if (name == "allow_methods")
+        this->addAllowMethod(value);
+    else if (name == "index")
+        this->addIndex(value);
+    else
+        this->props[name] = value;
 }
 
 std::string ConfigLocation::getProperty(std::string name)
 {
-    return this->props[name]; //check if not exist!
+    return this->props[name];
 }
 
 void    ConfigLocation::setLocation(ConfigLocation cl)

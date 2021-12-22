@@ -20,10 +20,10 @@ void    Configuration::loadConfig()
     int is_exist = 0;
 
     if (!this->valid_file_name())
-        throw Configuration::InvalidFileNameException();
+        throw s_misconfiguration::InvalidFileNameException();
     conf_to_read.open(this->path);
     if (!conf_to_read.is_open())
-        throw   Configuration::NoFileOpenException();
+        throw   s_misconfiguration::NoFileOpenException();
     while (std::getline(conf_to_read, line))
     {
         this->trim_line(line);
@@ -49,6 +49,8 @@ void    Configuration::loadConfig()
         line.clear();
     }
     conf_to_read.close();
+    if (this->servers.size() == 0)
+        throw   s_misconfiguration::NoServerException();
 }
 
 ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exist)
@@ -110,6 +112,8 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
         }
         line.clear();
     }
+    if ((cs.getConfig())[0].index.size() == 0)
+        throw   s_misconfiguration::NoIndexException();
     this->parse_listen(cs, listen);
     if (*is_exist)
         (*existed).addConfig((cs.getConfig())[0]);
@@ -214,7 +218,9 @@ void    Configuration::parseServerAddress(ConfigServer *cs)
         int port = 0;
         std::string addr = "0.0.0.0";
         pos = props["listen"].find_first_of(":", pos);
-        if ((size_t)pos == props["listen"].size())
+        if (pos == -1)
+            //(void)pos;
+            //throw   s_misconfiguration::InvalidListenException();
             port = std::atoi(props["listen"].c_str());
         else
         {
@@ -224,7 +230,6 @@ void    Configuration::parseServerAddress(ConfigServer *cs)
                 addr = "0.0.0.0";
         }
         //need to check if addr or port is null
-        //need to do many key = listen params exist 
         (*cs).setAddress(addr);
         (*cs).setPort(port);
     }
@@ -295,8 +300,7 @@ ConfigServer    *Configuration::server_exist(std::vector<std::string>& words)
 void    Configuration::parse_listen(ConfigServer &cs, std::vector<std::string> listen)
 {
     if (listen.size() == 0)
-        return ;
-        //error
+        throw s_misconfiguration::NoListenException();
     else if(listen.size() == 1)
          cs.setProperty("listen", listen[0]);
     else
@@ -307,7 +311,7 @@ void    Configuration::parse_listen(ConfigServer &cs, std::vector<std::string> l
         {
             ConfigServer *csnew = new ConfigServer(cs);
             csnew->setProperty("listen", listen[i]);
-            this->parseServerAddress(csnew);
+            this->parseServerAddress(csnew); // must be commented
             csnew->setAddress(cs.getAddress());
             this->servers.push_back(*csnew);
             delete csnew;
@@ -322,4 +326,47 @@ bool    Configuration::valid_file_name()
     if (pth.substr(pth.size() - 5, 5) == ".conf")
         return (1);
     return (0);
+}
+
+bool    Configuration::valid_ip(std::string ip)
+{
+    int pos = 0;
+    int dot_count = 0;
+    int start = 0;
+    int ips_value = 0;
+    std::string ip_sect = "";
+
+    while (true)
+    {
+        pos = ip.find_first_of(".", pos);
+        if (pos == -1)
+            pos = ip.size();
+        ip_sect = ip.substr(start, pos - start);
+        for (int i=0; i<(int)ip_sect.size(); i++)
+        {
+            if (ip_sect[i] < '0' || ip_sect[i] > '9')
+                return (0);
+        }
+        ips_value = std::atoi(ip_sect.c_str());
+        if (ips_value < 0 || ips_value > 255)
+            return (0);
+        if (dot_count > 3)
+            return (0);
+        else if (dot_count == 3 && pos == (int)ip.size())
+            return (1);
+        dot_count++;
+        pos++;
+        start = pos;
+    }
+
+}
+
+bool    Configuration::valid_port(std::string port)
+{
+        for (int i=0; i<(int)port.size(); i++)
+        {
+            if (port[i] <= '0' || port[i] > '9')
+                return (0);
+        }
+        return (1);
 }

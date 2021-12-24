@@ -20,7 +20,10 @@ Response::Response(ConfigServer &config) {
 Response::Response(ConfigServer &config, Request& req) {
     //std::cout << req.getHeader("Host") << "\n";
     t_server_config conf = config.getConfigByName(req.getHeader("Host"));
-    open_err = false;
+	redirect = config.isRedirect(req.getHeader("Host"), req.getUrl());
+    if (redirect)
+		true_path = config.getRedirect(req.getHeader("Host"), req.getUrl());
+	open_err = false;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
@@ -74,25 +77,32 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
         std::cerr<<"Request parsing error\n";
         return ;
     }
+	std::cout << Path << "\n";
     //SetPath(request.getUrl());
-    if (file_exist(Path) == 1) {
-        if (request.getMethod() == "GET" && request.getParams().empty())
-            GETResponse();
-        else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
-            POSTResponse(request);
-        else if (request.getMethod() == "DELETE")
-            remove(Path.c_str());
-    }
-	else if (file_exist(Path) == 2 && config.getAutoIndex(request.getHeader
-	("Host"), request.getUrl())){
-		t_server_config conf = config.getConfigByName(request.getHeader("Host"));
-		std::string autoindex_html = autoindex(Path, conf.props["root"].length());
-		ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
-				+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
+	if (!(redirect))
+	{
+		if (file_exist(Path) == 1)
+		{
+			if (request.getMethod() == "GET" && request.getParams().empty())
+				GETResponse();
+			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
+				POSTResponse(request);
+			else if (request.getMethod() == "DELETE")
+				remove(Path.c_str());
+		}
+		else if (file_exist(Path) == 2 && config.getAutoIndex(request.getHeader
+				("Host"), request.getUrl())){
+			t_server_config conf = config.getConfigByName(request.getHeader("Host"));
+			std::string autoindex_html = autoindex(Path, conf.props["root"].length());
+			ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
+						  + std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
+		}
+		else
+			ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type + "\nContent-Length:  " +
+						  std::to_string(error_404.size()) + "\n\n" + error_404;
 	}
-    else
-        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
-                      std::to_string(error_404.size()) + "\n\n" + error_404;
+	else
+		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: " + true_path;
 }
 
 void            Response::POSTResponse(Request  &request)
@@ -113,7 +123,7 @@ void            Response::GETResponse()
         ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(Html_text.size()) + "\n\n" + Html_text;
     else if (!(open_err))
-        ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+        ResponseMsg = "HTTP/1.1 403 Forbidden\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(error_403.size()) + "\n\n" + error_403;
     else
         ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
@@ -125,14 +135,14 @@ void            Response::DELETEResponse()
     if (file_exist(Path) > 0)
     {
         if (remove(Path.c_str()) == -1)
-            ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+            ResponseMsg = "HTTP/1.1 403 Forbidden\nContent-Type: " + content_type + "\nContent-Length:  " +
                           std::to_string(error_403.size()) + "\n\n" + error_403;
         else
             ResponseMsg = "HTTP/1.1 204 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                           std::to_string(error_204.size()) + "\n\n" + error_204;
     }
     else
-        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type +
+        ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type +
 				"\nContent-Length:  " +
                       std::to_string(error_404.size()) + "\n\n" + error_404;
 }

@@ -31,6 +31,7 @@ private:
     std::string     Html_text;
     std::string     Path;
     std::string     content_type;
+	std::string		true_path;
 
 
     std::string     error_404;
@@ -38,6 +39,7 @@ private:
     std::string     error_204;
 
     bool            open_err;
+	bool			redirect;
 };
 
 

@@ -149,7 +149,7 @@ ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::
         std::string loc_url = (*bg).getUrl();
         if (loc_url == url || std::strncmp(loc_url.c_str(), url.c_str(), loc_url.size()) == 0)
             return (*bg);
-        if (loc_url[0] == '*')
+        if (loc_url[0] == '*' && url != "/")
         {
             //TD not 0 index, must be i - index
             loc_url = loc_url.substr(1, loc_url.size() - 1);
@@ -274,6 +274,25 @@ std::string     ConfigServer::getReturnUrl(ConfigLocation cl)
     if (t != props.end())
         return (*t).second;
     return empt;
+}
+
+bool    ConfigServer::isRedirect(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::string ret = "";
+    
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    if (cl.getUrl().size() > 0)
+    {
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        ret = this->getReturnUrl(cl);
+        if (sub_cl.getUrl().size() > 0)
+            ret = this->getReturnUrl(sub_cl);
+    }
+    if (ret.size() == 0)
+        return (0);
+    return (1);
 }
 
 std::string     ConfigServer::getRootPath(std::string host, std::string url)

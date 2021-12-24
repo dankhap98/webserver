@@ -12,7 +12,6 @@ Response::Response(ConfigServer &config) {
 //    error_404 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header id=\"header\"><h1>404</h1></header></body></html>";
     t_server_config conf = config.getConfig()[0];
     open_err = false;
-	redirect = ;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
@@ -21,6 +20,7 @@ Response::Response(ConfigServer &config) {
 Response::Response(ConfigServer &config, Request& req) {
     //std::cout << req.getHeader("Host") << "\n";
     t_server_config conf = config.getConfigByName(req.getHeader("Host"));
+	redirect = config.isRedirect(req.getHeader("Host"), req.getUrl());
     open_err = false;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
@@ -77,7 +77,7 @@ void            Response::SetResponseMsg(Request &request)
     }
 	std::cout << Path << "\n";
     //SetPath(request.getUrl());
-	if (redirect)
+	if (!(redirect))
 	{
 		if (file_exist(Path) > 0)
 		{
@@ -92,10 +92,7 @@ void            Response::SetResponseMsg(Request &request)
 						  std::to_string(error_404.size()) + "\n\n" + error_404;
 	}
 	else
-	{
-		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: http://127.0.0.1:8001/test/test.html\n\n";
-		redirect = false;
-	}
+		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: /images/P.jpg\n\n";
 }
 
 void            Response::POSTResponse(Request  &request)

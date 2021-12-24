@@ -117,7 +117,7 @@ int    main()
             /*std::cout << "GET IP TEST. ip: " << (*bg).getAddress() << "\n";
             std::cout << (*bg).getIpAddressInt() <<  "\n";
             std::cout << "________END OF TEST______\n";*/
-            std::cout << "GET ROOT TEST. \n";
+            /*std::cout << "GET ROOT TEST. \n";
             std::cout << (*bg).getRootPath("localhost:8000", "/put_test/test") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/post_body/test") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/directory/test/some.txt") << "\n";
@@ -125,7 +125,16 @@ int    main()
             std::cout << (*bg).getRootPath("localhost:8000", "/some/path") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/images/logo.jpg") << "\n";
-            std::cout << "________END OF TEST______\n";
+            std::cout << "________END OF TEST______\n";*/
+            /*std::cout << "GET REDIRECT TEST. \n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/put_test/test") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/post_body/test") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/directory/test/some.txt") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/404.css") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/some/path") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/images/logo.jpg") << "\n";
+            std::cout << "________END OF TEST______\n";*/
             /*std::cout << "GET IP TEST. \n";
             std::cout<< conf->valid_ip("127.0.0.1") << '\n';
             std::cout<< conf->valid_ip("0.0.0.0") << '\n';

@@ -12,6 +12,7 @@ Response::Response(ConfigServer &config) {
 //    error_404 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header id=\"header\"><h1>404</h1></header></body></html>";
     t_server_config conf = config.getConfig()[0];
     open_err = false;
+	redirect = ;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
@@ -74,8 +75,9 @@ void            Response::SetResponseMsg(Request &request)
         std::cerr<<"Request parsing error\n";
         return ;
     }
+	std::cout << Path << "\n";
     //SetPath(request.getUrl());
-	if (!(redirect))
+	if (redirect)
 	{
 		if (file_exist(Path) > 0)
 		{
@@ -91,7 +93,8 @@ void            Response::SetResponseMsg(Request &request)
 	}
 	else
 	{
-		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: " + true_path;
+		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: http://127.0.0.1:8001/test/test.html\n\n";
+		redirect = false;
 	}
 }
 

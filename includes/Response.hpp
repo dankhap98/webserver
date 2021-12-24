@@ -37,6 +37,7 @@ private:
     std::string     error_204;
 
     bool            open_err;
+	bool			redirect;
 };
 
 

@@ -249,10 +249,38 @@ std::string     ConfigServer::getRootFromLocation(ConfigLocation cl, std::string
     return root;
 }
 
+std::string     ConfigServer::getRootWithIndex(std::vector<std::string> index, std::string root)
+{
+    std::vector<std::string>::iterator bg = index.begin();
+    std::ofstream   file;
+    while (bg != index.end())
+    {
+        file.open((root + "/" + (*bg)).c_str(),  std::ifstream::in);
+        if (file.is_open())
+        {
+            file.close();
+            return root + "/" + (*bg);
+        }
+        ++bg;
+    }
+    return root;
+}
+
+std::string     ConfigServer::getReturnUrl(ConfigLocation cl)
+{
+    std::map<std::string, std::string> props = cl.getProps();
+    std::map<std::string, std::string>::iterator t = props.find("return");
+    std::string empt = "";
+    if (t != props.end())
+        return (*t).second;
+    return empt;
+}
+
 std::string     ConfigServer::getRootPath(std::string host, std::string url)
 {
     t_server_config conf  = this->getConfigByName(host);
     std::string root = conf.props["root"];
+    std::string ret = "";
     std::ofstream   file;
     std::vector<std::string> index = conf.index;
     url = url.substr(0, url.find_first_of("?"));
@@ -261,20 +289,7 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
         root = "./";
     
     if (url == "/")
-    {
-        std::vector<std::string>::iterator bg1 = index.begin();
-        while (bg1 != index.end())
-        {
-            file.open((root + "/" + (*bg1)).c_str(),  std::ifstream::in);
-            if (file.is_open())
-            {
-                file.close();
-                return root + "/" + (*bg1);
-            }
-            ++bg1;
-        }
-        return root;
-    }
+        return  this->getRootWithIndex(index, root);
         
     ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
     root = this->getRootFromLocation(cl, root);
@@ -283,6 +298,7 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
         url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
         ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
         root = this->getRootFromLocation(sub_cl, root);
+        ret = this->getReturnUrl(cl);
         if (cl.getIndex().size() > 0)
             index = cl.getIndex();
         if (sub_cl.getUrl().size() > 0)
@@ -290,10 +306,13 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
             url = url.substr(sub_cl.getUrl().size(), url.size() - sub_cl.getUrl().size());
             if (sub_cl.getIndex().size() > 0)
                 index = sub_cl.getIndex();
+            ret = this->getReturnUrl(sub_cl);
         }
     }
     if (root[root.size() - 1] == '/')
         url = url.substr(1, url.size() - 1);
+    if (ret.size() > 0)
+        return root + ret;
     file.open((root + url).c_str(),  std::ifstream::in);
     if (file.is_open())
     {
@@ -303,7 +322,8 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
     else
     {
         root += url;
-        std::vector<std::string>::iterator bg = index.begin();
+        return  this->getRootWithIndex(index, root);
+        /*std::vector<std::string>::iterator bg = index.begin();
         while (bg != index.end())
         {
             file.open((root + "/" + (*bg)).c_str(),  std::ifstream::in);
@@ -313,10 +333,10 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
                 return root + "/" + (*bg);
             }
             ++bg;
-        }
+        }*/
     }
 
-    return root;
+    //return root;
 }
 
 

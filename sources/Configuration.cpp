@@ -220,14 +220,19 @@ void    Configuration::parseServerAddress(ConfigServer *cs)
         pos = props["listen"].find_first_of(":", pos);
         if (pos == -1)
             //(void)pos;
-            //throw   s_misconfiguration::InvalidListenException();
-            port = std::atoi(props["listen"].c_str());
+            throw   s_misconfiguration::InvalidListenException();
+            //port = std::atoi(props["listen"].c_str());
         else
         {
             addr = props["listen"].substr(0, pos);
-            port = std::atoi((props["listen"].substr(pos + 1, props["listen"].size() - pos - 1)).c_str());
+            std::string prt = props["listen"].substr(pos + 1, props["listen"].size() - pos - 1);
+            if (!this->valid_port(prt))
+                throw s_misconfiguration::InvalidListenException();
+            port = std::atoi(prt.c_str());
             if (addr == "localhost")
                 addr = "0.0.0.0";
+            if (!this->valid_ip(addr))
+                throw s_misconfiguration::InvalidListenException();
         }
         //need to check if addr or port is null
         (*cs).setAddress(addr);
@@ -311,7 +316,11 @@ void    Configuration::parse_listen(ConfigServer &cs, std::vector<std::string> l
         {
             ConfigServer *csnew = new ConfigServer(cs);
             csnew->setProperty("listen", listen[i]);
-            this->parseServerAddress(csnew); // must be commented
+            int pos = listen[i].find_first_of(":", 0);
+            if (pos == -1 && this->valid_port(listen[i]))
+                csnew->setPort(std::atoi(listen[i].c_str()));
+            else if (pos != -1)
+                this->parseServerAddress(csnew);
             csnew->setAddress(cs.getAddress());
             this->servers.push_back(*csnew);
             delete csnew;
@@ -342,6 +351,8 @@ bool    Configuration::valid_ip(std::string ip)
         if (pos == -1)
             pos = ip.size();
         ip_sect = ip.substr(start, pos - start);
+        if (ip_sect.size() == 0)
+            return (0);
         for (int i=0; i<(int)ip_sect.size(); i++)
         {
             if (ip_sect[i] < '0' || ip_sect[i] > '9')
@@ -363,10 +374,12 @@ bool    Configuration::valid_ip(std::string ip)
 
 bool    Configuration::valid_port(std::string port)
 {
-        for (int i=0; i<(int)port.size(); i++)
-        {
-            if (port[i] <= '0' || port[i] > '9')
-                return (0);
-        }
-        return (1);
+    if (port.size() == 0)
+        return (0);
+    for (int i=0; i<(int)port.size(); i++)
+    {
+        if (port[i] < '0' || port[i] > '9' || (port[i] == '0' && i == 0))
+            return (0);
+    }
+    return (1);
 }

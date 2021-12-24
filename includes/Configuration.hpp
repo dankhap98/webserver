@@ -79,8 +79,8 @@ class Configuration
         ConfigLocation    loadLocationConfig(std::ifstream& ifs);
 
         bool    valid_file_name();
-        bool    valid_ip(std::string ip);
-        bool    valid_port(std::string port);
+        //bool    valid_ip(std::string ip);
+        //bool    valid_port(std::string port);
         void    trim_line(std::string& line);
         void    parse_words(std::string line, std::vector<std::string>& words);
         void    parseServerAddress(ConfigServer *cs);
@@ -96,6 +96,9 @@ class Configuration
 
         void    setPath(const std::string& path);
         void    loadConfig();
+
+         bool    valid_ip(std::string ip);
+        bool    valid_port(std::string port);
 
         //t_misconfiguration misconfig;
         /*class NoFileOpenException: public std::exception

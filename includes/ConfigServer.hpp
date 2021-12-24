@@ -25,6 +25,8 @@ class ConfigServer
 
         std::string     getErrorUrl(int code, std::string url);
         std::string     getRootFromLocation(ConfigLocation cl, std::string root);
+        std::string     getRootWithIndex(std::vector<std::string> index, std::string root);
+        std::string     getReturnUrl(ConfigLocation cl);
     
     public:
         typedef std::map<std::string, std::string> props_type;

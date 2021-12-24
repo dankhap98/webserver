@@ -8,6 +8,11 @@ std::map<std::string, std::string> Request::getParams() const{
     return this->_params;
 }
 
+std::string	Request::getParamsRaw() const
+{
+	return this->params_row;
+}
+
 //std::map<std::string, std::string> Request::getHeader() const{
 //    return this->_headers;
 //}
@@ -135,7 +140,7 @@ void    Request::parseRequest(std::string request)
     {
         start = npos + 1;
         npos = request.find_first_of("\n", start);
-        std::string params_row = request.substr(start, npos - start);
+        params_row = request.substr(start, npos - start);
         start = 0;
         if (npos != -1 || params_row.size() > 0)
         {
@@ -158,7 +163,7 @@ void    Request::parseRequest(std::string request)
         npos = getUrl().find_first_of("?", 0);
         if (npos != -1)
         {
-            std::string params_row = getUrl().substr(npos + 1, getUrl().size() - npos - 1);
+            params_row = getUrl().substr(npos + 1, getUrl().size() - npos - 1);
             Query = params_row;
             start = 0;
             while (true)

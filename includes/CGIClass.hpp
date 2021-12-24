@@ -14,7 +14,7 @@ public:
     CGIClass(Request &request);
     ~CGIClass();
 
-    char*  startCGI(std::string Page);
+    std::string startCGI(Request &req);
 
 private:
     void    SetEviroment(Request &request);
@@ -28,7 +28,7 @@ private:
     std::map<std::string, std::string> RequestEnviroment;
 	char **RequestEnviromentForExec;
     char **argv;
-	char bufferOut[100000];
+	std::string bufferOut;
 };
 
 

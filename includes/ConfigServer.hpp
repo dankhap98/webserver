@@ -24,7 +24,9 @@ class ConfigServer
         int port;
 
         std::string     getErrorUrl(int code, std::string url);
-        std::string     getRootFromLocation(ConfigLocation cl, std::string root, std::vector<std::string> *index);
+        std::string     getRootFromLocation(ConfigLocation cl, std::string root);
+        std::string     getRootWithIndex(std::vector<std::string> index, std::string root);
+        std::string     getReturnUrl(ConfigLocation cl);
     
     public:
         typedef std::map<std::string, std::string> props_type;
@@ -56,6 +58,10 @@ class ConfigServer
         uint32_t    getIpAddressInt();
         std::string     getRootPath(std::string host, std::string url);
         bool        getAutoIndex(std::string host, std::string url);
+        std::string    getBufferSize(std::string host, std::string url);
+        std::vector<std::string>    getAllowMethodsForUrl(std::string host, std::string url);
+        std::string    getRedirect(std::string host, std::string url);
+        bool    isRedirect(std::string host, std::string url);
 };
 
 #endif

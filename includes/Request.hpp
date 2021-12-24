@@ -13,11 +13,13 @@ class Request
        std::map<std::string, std::string> _params;
        std::string  _body;
        std::string  Query;
+	   std::string	params_row;
 
     public:
         Request();
         ~Request();
 
+		std::string getParamsRaw() const;
         std::string getBody() const;
         std::string getMethod() const;
         std::string getUrl() const;

@@ -120,12 +120,38 @@ int    main()
             /*std::cout << "GET ROOT TEST. \n";
             std::cout << (*bg).getRootPath("localhost:8000", "/put_test/test") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/post_body/test") << "\n";
-            std::cout << (*bg).getRootPath("localhost:8000", "/directory/test") << "\n";
+            std::cout << (*bg).getRootPath("localhost:8000", "/directory/test/some.txt") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/404.css") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/some/path") << "\n";
             std::cout << (*bg).getRootPath("localhost:8000", "/") << "\n";
+            std::cout << (*bg).getRootPath("localhost:8000", "/images/logo.jpg") << "\n";
             std::cout << "________END OF TEST______\n";*/
-            std::cout << "GET AUTOINDEX TEST. \n";
+            /*std::cout << "GET REDIRECT TEST. \n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/put_test/test") << (*bg).getRedirect("localhost:8000", "/put_test/test") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/post_body/test") << (*bg).getRedirect("localhost:8000", "/post_body/test") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/directory/test/some.txt") << (*bg).getRedirect("localhost:8000", "/directory/test/some.txt") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/404.css") << (*bg).getRedirect("localhost:8000", "/404.css") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/some/path") << (*bg).getRedirect("localhost:8000", "/some/path") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/") << (*bg).getRedirect("localhost:8000", "/") << "\n";
+            std::cout << (*bg).isRedirect("localhost:8000", "/images/logo.jpg") << (*bg).getRedirect("localhost:8000", "/images/logo.jpg") << "\n";
+            std::cout << "________END OF TEST______\n";*/
+            /*std::cout << "GET IP TEST. \n";
+            std::cout<< conf->valid_ip("127.0.0.1") << '\n';
+            std::cout<< conf->valid_ip("0.0.0.0") << '\n';
+            std::cout<< conf->valid_ip("127.0.0.-1") << '\n';
+            std::cout<< conf->valid_ip("127.300.0.1") << '\n';
+            std::cout<< conf->valid_ip("127..0.1") << '\n';
+            std::cout<< conf->valid_ip("127.0.0.1.") << '\n';
+            std::cout<< conf->valid_ip("") << '\n';
+            std::cout << "________END OF TEST______\n";
+            std::cout << "GET PORT TEST. \n";
+            std::cout<< conf->valid_port("127.0.0.1") << '\n';
+            std::cout<< conf->valid_port("test") << '\n';
+            std::cout<< conf->valid_port("80") << '\n';
+            std::cout<< conf->valid_port("080") << '\n';
+            std::cout<< conf->valid_port("") << '\n';
+            std::cout << "________END OF TEST______\n";*/
+            /*std::cout << "GET AUTOINDEX TEST. \n";
             std::cout << (*bg).getAutoIndex("localhost:8000", "/put_test/test") << "\n";
             std::cout << (*bg).getAutoIndex("localhost:8000", "/post_body/test") << "\n";
             std::cout << (*bg).getAutoIndex("localhost:8000", "/directory/test") << "\n";
@@ -133,6 +159,22 @@ int    main()
             std::cout << (*bg).getAutoIndex("localhost:8000", "/some/path") << "\n";
             std::cout << (*bg).getAutoIndex("localhost:8000", "/") << "\n";
             std::cout << "________END OF TEST______\n";
+            std::cout << "GET BSIZE TEST. \n";
+            std::cout << (*bg).getBufferSize("localhost:8000", "/put_test/test") << "\n";
+            std::cout << (*bg).getBufferSize("localhost:8000", "/post_body/test") << "\n";
+            std::cout << (*bg).getBufferSize("localhost:8000", "/directory/test") << "\n";
+            std::cout << (*bg).getBufferSize("localhost:8000", "/404.css") << "\n";
+            std::cout << (*bg).getBufferSize("localhost:8000", "/some/path") << "\n";
+            std::cout << (*bg).getBufferSize("localhost:8000", "/") << "\n";
+            std::cout << "________END OF TEST______\n";*/
+            /*std::cout << "GET ALLOW_METHODS TEST. \n";
+            print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/put_test/test"));
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/post_body/test"));
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/directory/test"));
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/404.css"));
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/some/path"));
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/"));
+            std::cout << "________END OF TEST______\n";*/
             ++bg;
         }
         

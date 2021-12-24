@@ -149,7 +149,7 @@ ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::
         std::string loc_url = (*bg).getUrl();
         if (loc_url == url || std::strncmp(loc_url.c_str(), url.c_str(), loc_url.size()) == 0)
             return (*bg);
-        if (loc_url[0] == '*')
+        if (loc_url[0] == '*' && url != "/")
         {
             //TD not 0 index, must be i - index
             loc_url = loc_url.substr(1, loc_url.size() - 1);
@@ -219,98 +219,126 @@ std::string     ConfigServer::getErrorUrl(int code, std::string url)
     return url;
 }
 
-std::string     ConfigServer::getRootFromLocation(ConfigLocation cl, std::string root, std::vector<std::string> *index)
+std::string     ConfigServer::getRootFromLocation(ConfigLocation cl, std::string root)
 {
     if (cl.getUrl().size() == 0)
         return root;
     else if (cl.getProperty("root").size() == 0)
     {
-        //std::cout << "Location: " << cl.getUrl() << " no root\n";
         std::map<std::string, std::string> props = cl.getProps();
         std::map<std::string, std::string>::iterator t = props.find("alias");
         if (t == props.end())
-        {
             root += cl.getUrl();
-            //std::cout << "no alias\n";
-        }
         else
-        {
             root += cl.getProperty("alias");
-            //std::cout << "alias found\n";
-        }
-        //std::cout << root << "end func\n";
     }
     else
     {
         std::string root_prop = cl.getProperty("root");
         std::map<std::string, std::string> props = cl.getProps();
         std::map<std::string, std::string>::iterator t = props.find("alias");
-        //std::cout << "Location: " << cl.getUrl() << "root: " << root_prop << "\n";
         if (t != props.end())
-        {
             root += cl.getProperty("alias");
-            //std::cout << "alias found\n";
-        }
         if (root_prop[0] == '.')
-        {
             root = cl.getProperty("root");
-            //std::cout << "abs root path\n";
-        }
         else if (root_prop[0] == '/')
-        {
             root += root_prop;
-            //std::cout << "rel root path\n";
-        }
         else
             root = "./" + cl.getProperty("root");
-        //std::cout << root << " end func\n";
     }
-    if (cl.getIndex().size() > 0)
-        *index = cl.getIndex();
     return root;
+}
+
+std::string     ConfigServer::getRootWithIndex(std::vector<std::string> index, std::string root)
+{
+    std::vector<std::string>::iterator bg = index.begin();
+    std::ofstream   file;
+    while (bg != index.end())
+    {
+        file.open((root + "/" + (*bg)).c_str(),  std::ifstream::in);
+        if (file.is_open())
+        {
+            file.close();
+            return root + "/" + (*bg);
+        }
+        ++bg;
+    }
+    return root;
+}
+
+std::string     ConfigServer::getReturnUrl(ConfigLocation cl)
+{
+    std::map<std::string, std::string> props = cl.getProps();
+    std::map<std::string, std::string>::iterator t = props.find("return");
+    std::string empt = "";
+    if (t != props.end())
+        return (*t).second;
+    return empt;
+}
+
+std::string   ConfigServer::getRedirect(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::string ret = "";
+    
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    if (cl.getUrl().size() > 0)
+    {
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        ret = this->getReturnUrl(cl);
+        if (sub_cl.getUrl().size() > 0)
+            ret = this->getReturnUrl(sub_cl);
+    }
+    return ret;
+}
+
+
+bool    ConfigServer::isRedirect(std::string host, std::string url)
+{
+    std::string ret = this->getRedirect(host, url);
+    if (ret.size() == 0)
+        return (0);
+    return (1);
 }
 
 std::string     ConfigServer::getRootPath(std::string host, std::string url)
 {
     t_server_config conf  = this->getConfigByName(host);
     std::string root = conf.props["root"];
+    std::string ret = "";
     std::ofstream   file;
     std::vector<std::string> index = conf.index;
+    url = url.substr(0, url.find_first_of("?"));
     
     if (root.size() == 0)
         root = "./";
     
     if (url == "/")
-    {
-        //std::cout << index.size() << "\n";
-        std::vector<std::string>::iterator bg1 = index.begin();
-        while (bg1 != index.end())
-        {
-            //std::cout << (*bg1) << "\n";
-            file.open((root + "/" + (*bg1)).c_str(),  std::ifstream::in);
-            if (file.is_open())
-            {
-                file.close();
-                return root + "/" + (*bg1);
-            }
-            ++bg1;
-        }
-        return root;
-    }
+        return  this->getRootWithIndex(index, root);
         
-   
     ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
-    root = this->getRootFromLocation(cl, root, &index);
+    root = this->getRootFromLocation(cl, root);
     if (cl.getUrl().size() > 0)
     {
         url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
         ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
-        root = this->getRootFromLocation(sub_cl, root, &index);
+        root = this->getRootFromLocation(sub_cl, root);
+        ret = this->getReturnUrl(cl);
+        if (cl.getIndex().size() > 0)
+            index = cl.getIndex();
         if (sub_cl.getUrl().size() > 0)
+        {
             url = url.substr(sub_cl.getUrl().size(), url.size() - sub_cl.getUrl().size());
+            if (sub_cl.getIndex().size() > 0)
+                index = sub_cl.getIndex();
+            ret = this->getReturnUrl(sub_cl);
+        }
     }
     if (root[root.size() - 1] == '/')
         url = url.substr(1, url.size() - 1);
+    if (ret.size() > 0)
+        return root + ret;
     file.open((root + url).c_str(),  std::ifstream::in);
     if (file.is_open())
     {
@@ -320,7 +348,8 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
     else
     {
         root += url;
-        std::vector<std::string>::iterator bg = index.begin();
+        return  this->getRootWithIndex(index, root);
+        /*std::vector<std::string>::iterator bg = index.begin();
         while (bg != index.end())
         {
             file.open((root + "/" + (*bg)).c_str(),  std::ifstream::in);
@@ -330,10 +359,10 @@ std::string     ConfigServer::getRootPath(std::string host, std::string url)
                 return root + "/" + (*bg);
             }
             ++bg;
-        }
+        }*/
     }
 
-    return root;
+    //return root;
 }
 
 
@@ -362,6 +391,7 @@ bool    ConfigServer::getAutoIndex(std::string host, std::string url)
             else
                 is_on = false;
         }
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
         ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
         if (sub_cl.getUrl().size() > 0)
         {
@@ -377,4 +407,60 @@ bool    ConfigServer::getAutoIndex(std::string host, std::string url)
         }
     }
     return is_on;
+}
+
+std::string    ConfigServer::getBufferSize(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::string bsize = conf.props["client_body_buffer_size"];
+
+    if (bsize.size() == 0)
+        bsize = "8000";
+    
+     if (url == "/")
+        return bsize;
+
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    if (cl.getUrl().size() > 0)
+    {
+        std::map<std::string, std::string> props = cl.getProps();
+        std::map<std::string, std::string>::iterator t = props.find("client_body_buffer_size");
+        if (t != props.end())
+            bsize = (*t).second;
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        if (sub_cl.getUrl().size() > 0)
+        {
+            std::map<std::string, std::string> s_props = sub_cl.getProps();
+            std::map<std::string, std::string>::iterator s_t = s_props.find("client_body_buffer_size");
+            if (s_t != s_props.end())
+                bsize = (*t).second;
+        }
+    }
+    return bsize;
+}
+
+std::vector<std::string>    ConfigServer::getAllowMethodsForUrl(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::vector<std::string> am = conf.allow_methods;
+    
+    if (url == "/")
+        return am;
+
+
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    if (cl.getUrl().size() > 0)
+    {
+        if (cl.getAllowMethods().size() > 0)
+            am = cl.getAllowMethods();
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        if (sub_cl.getUrl().size() > 0)
+        {
+            if (sub_cl.getAllowMethods().size() > 0)
+                am = sub_cl.getAllowMethods();
+        }
+    }
+    return am;
 }

@@ -276,7 +276,7 @@ std::string     ConfigServer::getReturnUrl(ConfigLocation cl)
     return empt;
 }
 
-bool    ConfigServer::isRedirect(std::string host, std::string url)
+std::string   ConfigServer::getRedirect(std::string host, std::string url)
 {
     t_server_config conf  = this->getConfigByName(host);
     std::string ret = "";
@@ -290,6 +290,13 @@ bool    ConfigServer::isRedirect(std::string host, std::string url)
         if (sub_cl.getUrl().size() > 0)
             ret = this->getReturnUrl(sub_cl);
     }
+    return ret;
+}
+
+
+bool    ConfigServer::isRedirect(std::string host, std::string url)
+{
+    std::string ret = this->getRedirect(host, url);
     if (ret.size() == 0)
         return (0);
     return (1);

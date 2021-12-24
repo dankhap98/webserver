@@ -128,10 +128,10 @@ std::string	CGIClass::startCGI(Request &rec)
 		close(fdIn[1]);
 		while (1)
 		{
-			if (waitpid(pid, &status, WNOHANG) > 0)
-				break;
 			read(fdOut[0], &b, 1);
 			bufferOut = bufferOut + b;
+			if (waitpid(pid, &status, WNOHANG) > 0)
+				break;
 		}
 		close(fdOut[0]);
 	}

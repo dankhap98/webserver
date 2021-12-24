@@ -89,7 +89,8 @@ void            Response::SetResponseMsg(Request &request)
 				POSTResponse(request);
 			else if (request.getMethod() == "DELETE")
 				remove(Path.c_str());
-		} else
+		}
+		else
 			ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type + "\nContent-Length:  " +
 						  std::to_string(error_404.size()) + "\n\n" + error_404;
 	}

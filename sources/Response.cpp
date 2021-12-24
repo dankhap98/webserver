@@ -21,7 +21,9 @@ Response::Response(ConfigServer &config, Request& req) {
     //std::cout << req.getHeader("Host") << "\n";
     t_server_config conf = config.getConfigByName(req.getHeader("Host"));
 	redirect = config.isRedirect(req.getHeader("Host"), req.getUrl());
-    open_err = false;
+    if (redirect)
+		true_path = config.getRedirect(req.getHeader("Host"), req.getUrl());
+	open_err = false;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
@@ -92,7 +94,7 @@ void            Response::SetResponseMsg(Request &request)
 						  std::to_string(error_404.size()) + "\n\n" + error_404;
 	}
 	else
-		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: /images/P.jpg\n\n";
+		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: " + true_path;
 }
 
 void            Response::POSTResponse(Request  &request)

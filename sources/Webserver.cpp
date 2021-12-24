@@ -46,7 +46,7 @@ Webserver::Webserver()
    max_sd = listen_sd;
    FD_SET(listen_sd, &master_set);
 
-   timeout.tv_sec  = 1;
+   timeout.tv_sec  = 14;
    timeout.tv_usec = 0;
 
    std::cout << "Server created\n";

@@ -26,7 +26,7 @@ Response::Response(ConfigServer &config, Request& req) {
     error_204 = readHtml("204.html");
     Path = config.getRootPath(req.getHeader("Host"), req.getUrl());
     //std::cout << Path << "\n";
-    this->SetResponseMsg(req);
+    this->SetResponseMsg(req, config);
 }
 
 Response::~Response() {
@@ -67,7 +67,7 @@ void     Response::SetPath(std::string url)
         Path = "test.html";
 }
 
-void            Response::SetResponseMsg(Request &request)
+void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 {
     if(request.getMethod().empty())
     {
@@ -75,7 +75,7 @@ void            Response::SetResponseMsg(Request &request)
         return ;
     }
     //SetPath(request.getUrl());
-    if (file_exist(Path) > 0) {
+    if (file_exist(Path) == 1) {
         if (request.getMethod() == "GET" && request.getParams().empty())
             GETResponse();
         else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
@@ -83,6 +83,13 @@ void            Response::SetResponseMsg(Request &request)
         else if (request.getMethod() == "DELETE")
             remove(Path.c_str());
     }
+	else if (file_exist(Path) == 2 && config.getAutoIndex(request.getHeader
+	("Host"), request.getUrl())){
+		t_server_config conf = config.getConfigByName(request.getHeader("Host"));
+		std::string autoindex_html = autoindex(Path, conf.props["root"].length());
+		ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
+				+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
+	}
     else
         ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(error_404.size()) + "\n\n" + error_404;

@@ -88,6 +88,21 @@ std::string	CGIClass::startCGI(Request &rec)
 		std::cerr << "Cannot create CGI pipe\n";
 		exit(1);
 	}
+	//
+	//
+	//
+	std::ofstream		file;
+	std::stringstream	buffer;
+
+	file.open("mdeep/test.html", std::ifstream::in);
+	if (file.is_open() == false)
+		return ("<!DOCTYPE html>\n<html><title>40404</title><body>There was an error finding your error page</body></html>\n");
+
+	buffer << file.rdbuf();
+	file.close();
+	//
+	//
+	//
 //	fdOldIn = dup(fileno(stdin));
 //	fdOldOut = dup(fileno(stdout));
 	char b;
@@ -96,7 +111,7 @@ std::string	CGIClass::startCGI(Request &rec)
 	{
 		dup2(fdOut[1], 1);
 		dup2(fdIn[0], 0);
-
+		write(fdIn[1], buffer.str().c_str(), buffer.str().length());
 		close(fdIn[1]);
 		close(fdOut[0]);
 		execve(argv[0], NULL, RequestEnviromentForExec);
@@ -109,7 +124,7 @@ std::string	CGIClass::startCGI(Request &rec)
 		close(fdIn[0]);
 		close(fdOut[1]);
 		RequestBody = rec.getParamsRaw();
-		write(fdIn[1], "addadada", 8);
+//		write(fdIn[1], "addadada", 8);
 		close(fdIn[1]);
 		while (1)
 		{

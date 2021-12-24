@@ -216,7 +216,7 @@ void    Webserver::receive_data(int i, int& close_conn)
                 request.parseRequest(buffer.data());
                 request.show();
                 Response response(*cs, request);
-                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().length(), 0);
                 if (rc < 0)
                 {
                     perror("  send() failed");

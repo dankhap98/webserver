@@ -75,17 +75,24 @@ void            Response::SetResponseMsg(Request &request)
         return ;
     }
     //SetPath(request.getUrl());
-    if (file_exist(Path) > 0) {
-        if (request.getMethod() == "GET" && request.getParams().empty())
-            GETResponse();
-        else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
-            POSTResponse(request);
-        else if (request.getMethod() == "DELETE")
-            remove(Path.c_str());
-    }
-    else
-        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
-                      std::to_string(error_404.size()) + "\n\n" + error_404;
+	if (!(redirect))
+	{
+		if (file_exist(Path) > 0)
+		{
+			if (request.getMethod() == "GET" && request.getParams().empty())
+				GETResponse();
+			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
+				POSTResponse(request);
+			else if (request.getMethod() == "DELETE")
+				remove(Path.c_str());
+		} else
+			ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type + "\nContent-Length:  " +
+						  std::to_string(error_404.size()) + "\n\n" + error_404;
+	}
+	else
+	{
+		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: " + true_path;
+	}
 }
 
 void            Response::POSTResponse(Request  &request)
@@ -106,7 +113,7 @@ void            Response::GETResponse()
         ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(Html_text.size()) + "\n\n" + Html_text;
     else if (!(open_err))
-        ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+        ResponseMsg = "HTTP/1.1 403 Forbidden\nContent-Type: " + content_type + "\nContent-Length:  " +
                       std::to_string(error_403.size()) + "\n\n" + error_403;
     else
         ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
@@ -118,14 +125,14 @@ void            Response::DELETEResponse()
     if (file_exist(Path) > 0)
     {
         if (remove(Path.c_str()) == -1)
-            ResponseMsg = "HTTP/1.1 403 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+            ResponseMsg = "HTTP/1.1 403 Forbidden\nContent-Type: " + content_type + "\nContent-Length:  " +
                           std::to_string(error_403.size()) + "\n\n" + error_403;
         else
             ResponseMsg = "HTTP/1.1 204 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
                           std::to_string(error_204.size()) + "\n\n" + error_204;
     }
     else
-        ResponseMsg = "HTTP/1.1 404 OK\nContent-Type: " + content_type +
+        ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type +
 				"\nContent-Length:  " +
                       std::to_string(error_404.size()) + "\n\n" + error_404;
 }

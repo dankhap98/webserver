@@ -61,6 +61,7 @@ class ConfigServer
         std::string    getBufferSize(std::string host, std::string url);
         std::vector<std::string>    getAllowMethodsForUrl(std::string host, std::string url);
         std::string    getRedirect(std::string host, std::string url);
+        std::string    getCGIPath(std::string host, std::string url);
         bool    isRedirect(std::string host, std::string url);
 };
 

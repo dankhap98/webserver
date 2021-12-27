@@ -175,6 +175,15 @@ int    main()
              print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/some/path"));
              print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/"));
             std::cout << "________END OF TEST______\n";*/
+            std::cout << "GET CGIPATH TEST. \n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/put_test/test")  << "\n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/post_body/test")  << "\n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/directory/test/some.txt")  << "\n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/404.css")  << "\n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/some/path")  << "\n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/")  << "\n";
+            std::cout << (*bg).getCGIPath("localhost:8000", "/mycgitotest")  << "\n";
+            std::cout << "________END OF TEST______\n";
             ++bg;
         }
         

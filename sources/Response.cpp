@@ -91,7 +91,12 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
 				POSTResponse(request, config);
 			else if (request.getMethod() == "DELETE")
+<<<<<<< HEAD
 				DELETEResponse();
+=======
+                DELETEResponse();
+				//remove(Path.c_str());
+>>>>>>> d097deab2d1cbfae0dfba769a41b3b51aa989314
 		}
 		else if (file_exist(Path) == 2 && config.getAutoIndex(request.getHeader
 				("Host"), request.getUrl())){

@@ -216,9 +216,14 @@ void    Webserver::receive_data(int i, int& close_conn)
                 request.parseRequest(buffer.data());
                 request.show();
                 Response response(*cs, request);
+<<<<<<< HEAD
 //				std::cout << response.GetResponseMsg().length() << "\n\n\n\n\n";
                 rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
 //				rc = send_all(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+=======
+				//std::cout<<response.GetResponseMsg();
+                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().length(), 0);
+>>>>>>> d097deab2d1cbfae0dfba769a41b3b51aa989314
                 if (rc < 0)
                 {
                     perror("  send() failed");

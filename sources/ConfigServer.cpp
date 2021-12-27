@@ -464,3 +464,30 @@ std::vector<std::string>    ConfigServer::getAllowMethodsForUrl(std::string host
     }
     return am;
 }
+
+std::string   ConfigServer::getCGIPath(std::string host, std::string url)
+{
+    t_server_config conf  = this->getConfigByName(host);
+    std::string cpath = "";
+    
+    ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
+    if (cl.getUrl().size() > 0)
+    {
+        url = url.substr(cl.getUrl().size(), url.size() - cl.getUrl().size());
+        std::map<std::string, std::string> props = cl.getProps();
+        std::map<std::string, std::string>::iterator t = props.find("cgi_pass");
+        std::cout << cl.getUrl() << " " << cpath;
+        if (t != props.end())
+            cpath = (*t).second;
+
+        ConfigLocation sub_cl = cl.getConfigSubLocationByUrl(url);
+        if (sub_cl.getUrl().size() > 0)
+        {
+            std::map<std::string, std::string> s_props = cl.getProps();
+            std::map<std::string, std::string>::iterator s_t = s_props.find("cgi_pass");
+            if (s_t != s_props.end())
+                cpath = (*s_t).second;
+        }
+    }
+    return cpath;
+}

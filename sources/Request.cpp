@@ -98,6 +98,27 @@ void    Request::show() //temporary func
     std::cout << this->_body << "\n";
 }
 
+void    Request::parseChunk(std::string request)
+{
+    std::string	head = request.substr(0, request.find("\r\n\r\n"));
+	std::string	chunks = request.substr(request.find("\r\n\r\n") + 4, request.size() - 1);
+	std::string	subchunk = chunks.substr(0, 100);
+	std::string	body = "";
+	int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+	size_t		i = 0;
+
+	while (chunksize)
+	{
+		i = chunks.find("\r\n", i) + 2;
+		body += chunks.substr(i, chunksize);
+		i += chunksize + 2;
+		subchunk = chunks.substr(i, 100);
+		chunksize = strtol(subchunk.c_str(), NULL, 16);
+	}
+
+	//request = head + "\r\n\r\n" + body + "\r\n\r\n";
+}
+
 void    Request::parseRequest(std::string request)
 {
     int start = 0;
@@ -120,6 +141,12 @@ void    Request::parseRequest(std::string request)
         pos = 0;
         npos = 0;
     }
+    if (request.find("Transfer-Encoding: chunked") != std::string::npos &&
+		request.find("Transfer-Encoding: chunked") < request.find("\r\n\r\n"))
+        {
+            this->parseChunk(request);
+            return ;
+        }
     while (true)
     {
         npos = request.find_first_of("\n", start);

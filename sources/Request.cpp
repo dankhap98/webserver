@@ -163,7 +163,7 @@ void    Request::parseRequest(std::string request)
             break;
         npos = 0;
     }
-    if (getMethod() == "POST" && npos > 0)
+    if (getMethod() == "POST" && npos > 0 && request.find("multipart/form-data") == std::string::npos)
     {
         start = npos + 1;
         npos = request.find_first_of("\n", start);

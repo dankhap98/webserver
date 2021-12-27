@@ -91,12 +91,8 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
 				POSTResponse(request, config);
 			else if (request.getMethod() == "DELETE")
-<<<<<<< HEAD
 				DELETEResponse();
-=======
-                DELETEResponse();
-				//remove(Path.c_str());
->>>>>>> d097deab2d1cbfae0dfba769a41b3b51aa989314
+
 		}
 		else if (file_exist(Path) == 2 && config.getAutoIndex(request.getHeader
 				("Host"), request.getUrl())){
@@ -115,16 +111,21 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 
 void            Response::POSTResponse(Request  &request, ConfigServer& config)
 {
-	if (false)
+	if (config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty() && request.getHeader("Content-Type")
+	.find( "multipart/form-data") != std::string::npos)
+	{
+		std::cout<<"\n\n\n\n\n\n\n\nEEEE\n\n\n\n\n\n\n\n";
+		setBoundary(request);
+		setPostHeader(request);
+		std::cout<<postFileName<<"\n\n";
+		setPostBody(request);
+	}
+	else
 	{
 		CGIClass cgi(request);
 		Html_text = cgi.startCGI(request);
 //		std::cout<<Html_text;
 		ResponseMsg = Html_text;
-	}
-	else
-	{
-		ResponseMsg = "HTTP/1.1 200 OK";
 	}
 }
 
@@ -192,3 +193,28 @@ std::string		Response::BodiLimit()
 }
 
 std::string     Response::GetResponseMsg() {return ResponseMsg;}
+
+void 			Response::setBoundary(Request  &request)
+{
+	int i = request.getHeader("Content-Type")
+					.find( "boundary=") + 9;
+	boundary = request.getHeader("Content-Type").substr(i, request.getHeader("Content-Type").size());
+}
+
+void 			Response::setPostHeader(Request &request)
+{
+//	int nameS = request.getBody().find("filename=") + 10;
+//	int nameF = request.getBody().find("Type:");
+//	postFileName = request.getBody().substr(nameS, 9);
+	postFileName = "a.txt";
+}
+
+void 			Response::setPostBody(Request &request)
+{
+	std::cout << "start";
+	int start = request.getBody().find("\n\n");
+//	int size = request.getBody().length() - boundary.length();
+	std::cout << start;
+	postFileData = request.getBody().substr(start, 100);
+	std::cout << postFileData;
+}

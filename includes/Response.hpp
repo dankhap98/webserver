@@ -28,11 +28,18 @@ public:
     std::string		readHtml(const std::string& path);
     std::string     GetResponseMsg();
 private:
+	void			setBoundary(Request  &request);
+	void 			setPostHeader(Request  &request);
+	void 			setPostBody(Request  &request);
+
     std::string     ResponseMsg;
     std::string     Html_text;
     std::string     Path;
     std::string     content_type;
 	std::string		true_path;
+	std::string		boundary;
+	std::string 	postFileName;
+	std::string		postFileData;
 
 
 	std::string 	error_413;

@@ -18,7 +18,7 @@ public:
     ~Response();
 
     void            SetContentType();
-    void            SetResponseMsg(Request &request);
+    void            SetResponseMsg(Request &request, ConfigServer& config);
     void            SetPath(std::string url);
     void            GETResponse();
     void            POSTResponse(Request  &request);

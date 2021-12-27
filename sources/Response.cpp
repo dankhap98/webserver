@@ -9,8 +9,7 @@ Response::Response() {
 }
 
 Response::Response(ConfigServer &config) {
-//    error_404 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header id=\"header\"><h1>404</h1></header></body></html>";
-    t_server_config conf = config.getConfig()[0];
+	t_server_config conf = config.getConfig()[0];
     open_err = false;
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
@@ -18,7 +17,6 @@ Response::Response(ConfigServer &config) {
 }
 
 Response::Response(ConfigServer &config, Request& req) {
-    //std::cout << req.getHeader("Host") << "\n";
     t_server_config conf = config.getConfigByName(req.getHeader("Host"));
 	redirect = config.isRedirect(req.getHeader("Host"), req.getUrl());
     if (redirect)
@@ -27,7 +25,10 @@ Response::Response(ConfigServer &config, Request& req) {
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
-    Path = config.getRootPath(req.getHeader("Host"), req.getUrl());
+	error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
+				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
+				"id=\"header\"><h1>413</h1></header></body></html>";
+	Path = config.getRootPath(req.getHeader("Host"), req.getUrl());
     //std::cout << Path << "\n";
     this->SetResponseMsg(req, config);
 }
@@ -81,14 +82,16 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
     //SetPath(request.getUrl());
 	if (!(redirect))
 	{
+		if (request.getBody().size() > std::atoi(config.getBufferSize(request.getHeader("Host"), request.getUrl()).c_str()))
+			ResponseMsg = BodiLimit();
 		if (file_exist(Path) == 1)
 		{
 			if (request.getMethod() == "GET" && request.getParams().empty())
 				GETResponse();
 			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
-				POSTResponse(request);
+				POSTResponse(request, config);
 			else if (request.getMethod() == "DELETE")
-				remove(Path.c_str());
+				DELETEResponse();
 		}
 		else if (file_exist(Path) == 2 && config.getAutoIndex(request.getHeader
 				("Host"), request.getUrl())){
@@ -105,14 +108,19 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 		ResponseMsg = "HTTP/1.1 301 Moved Permanently\nLocation: " + true_path;
 }
 
-void            Response::POSTResponse(Request  &request)
+void            Response::POSTResponse(Request  &request, ConfigServer& config)
 {
-
-    CGIClass cgi(request);
-	Html_text = cgi.startCGI(request);
-	std::cout<<Html_text;
-	ResponseMsg = Html_text;
-
+	if (false)
+	{
+		CGIClass cgi(request);
+		Html_text = cgi.startCGI(request);
+//		std::cout<<Html_text;
+		ResponseMsg = Html_text;
+	}
+	else
+	{
+		ResponseMsg = "HTTP/1.1 200 OK";
+	}
 }
 
 void            Response::GETResponse()
@@ -165,6 +173,17 @@ void            Response::SetContentType()
         content_type = "image/jpeg";
     else
         content_type = "no type";
+}
+
+std::string		Response::BodiLimit()
+{
+	std::string msg;
+
+	msg = "HTTP/1.1 413 Payload Too Large\nContent-Type: " + content_type +
+		  "\nContent-Length:  " +
+		  std::to_string(error_413.size()) + "\n\n" + error_413;
+
+	return msg;
 }
 
 std::string     Response::GetResponseMsg() {return ResponseMsg;}

@@ -75,7 +75,12 @@
         <form action="http://127.0.0.1:8000/cgi_tester" method="POST">
             <input type="submit" name="action" value="Submit" class="btn btn-success">
 
-        </form></div>
+        </form>
+        <form enctype="multipart/form-data" method="post">
+            <p><input type="file" name="f">
+                <input type="submit" value="Отправить"></p>
+        </form>
+    </div>
     <div class="comments">
         <h2>Comments</h2>
         <ul>

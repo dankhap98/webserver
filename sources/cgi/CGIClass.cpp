@@ -9,8 +9,7 @@ CGIClass::CGIClass() {
 }
 
 CGIClass::~CGIClass() {
-	delete RequestEnviromentForExec;
-	double argv;
+	delete argv;
 }
 
 CGIClass::CGIClass(Request &request) {
@@ -135,6 +134,7 @@ std::string	CGIClass::startCGI(Request &rec)
 		}
 		close(fdOut[0]);
 	}
+	delete RequestEnviromentForExec;
 	return (bufferOut);
 }
 

@@ -22,8 +22,9 @@ public:
     void            SetResponseMsg(Request &request, ConfigServer& config);
     void            SetPath(std::string url);
     void            GETResponse();
-    void            POSTResponse(Request  &request);
+    void            POSTResponse(Request  &request, ConfigServer& config);
     void            DELETEResponse();
+	std::string		BodiLimit();
     std::string		readHtml(const std::string& path);
     std::string     GetResponseMsg();
 private:
@@ -34,6 +35,7 @@ private:
 	std::string		true_path;
 
 
+	std::string 	error_413;
     std::string     error_404;
     std::string     error_403;
     std::string     error_204;

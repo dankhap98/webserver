@@ -46,7 +46,7 @@ Webserver::Webserver()
    max_sd = listen_sd;
    FD_SET(listen_sd, &master_set);
 
-   timeout.tv_sec  = 1;
+   timeout.tv_sec  = 14;
    timeout.tv_usec = 0;
 
    std::cout << "Server created\n";
@@ -213,11 +213,13 @@ void    Webserver::receive_data(int i, int& close_conn)
             if (rc > 0)
             {
                 std::cout << "  recv() succes\n";
+				//std::cout << "unparsed " << buffer.data() << "\n";
                 request.parseRequest(buffer.data());
-//                request.show();
+                request.show();
                 Response response(*cs, request);
-				std::cout<<response.GetResponseMsg();
-                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().length(), 0);
+//				std::cout << response.GetResponseMsg().length() << "\n\n\n\n\n";
+                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+//				rc = send_all(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
                 if (rc < 0)
                 {
                     perror("  send() failed");
@@ -245,3 +247,28 @@ void    Webserver::receive_data(int i, int& close_conn)
     }
 }
 
+int		Webserver::send_all(int socket, const void *buffer, size_t length, int flags)
+{
+	int ret, bytes = 0;
+	while (bytes < length) {
+		std::cout<<"SEND\n";
+		if (ret <= 0)
+			return -1;
+		ret = send(socket, (char *)buffer+bytes, length-bytes, flags);
+		//check for errors
+		bytes+=ret;
+	}
+	return (0);
+}
+//	ssize_t n;
+//	const char *p = (char *)buffer;
+//	while (length > 0)
+//	{
+//		n = send(socket, p, length, flags);
+//		if (n <= 0)
+//			return -1;
+//		p += n;
+//		length -= n;
+//	}
+//	return 0;
+//}

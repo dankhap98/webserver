@@ -31,6 +31,7 @@ class Webserver
 
         void    check_errors(int flag, std::string msg, int cls = 0);
 
+		int		send_all(int socket, const void *buffer, size_t length, int flags);
         void    accept_connections(int& end_server);
         void    receive_data(int i, int& close_conn);
         void    check_descriptors(int desc_ready, int& end_server, int& close_conn);

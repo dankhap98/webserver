@@ -25,14 +25,15 @@ Response::Response(ConfigServer &config, Request& req) {
     if (redirect)
 		true_path = config.getRedirect(req.getHeader("Host"), req.getUrl());
 	open_err = false;
-	error_405 = readHtml("405.html");
-	error_405p2 = readHtml("405p2.html");
-    error_404 = readHtml(conf.error_pages[404]);
-    error_403 = readHtml("403.html");
-    error_204 = readHtml("204.html");
-	error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
-				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
-				"id=\"header\"><h1>413</h1></header></body></html>";
+	setErrorpages(conf);
+//	error_405 = readHtml("405.html");
+//	error_405p2 = readHtml("405p2.html");
+//    error_404 = readHtml(conf.error_pages[404]);
+//    error_403 = readHtml("403.html");
+//    error_204 = readHtml("204.html");
+//	error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
+//				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
+//				"id=\"header\"><h1>413</h1></header></body></html>";
 	Path = config.getRootPath(req.getHeader("Host"), req.getUrl());
     //std::cout << Path << "\n";
     this->SetResponseMsg(req, config);
@@ -40,6 +41,22 @@ Response::Response(ConfigServer &config, Request& req) {
 
 Response::~Response() {
 
+}
+
+void Response::setErrorpages(t_server_config &conf)
+{
+
+	if ((error_405 = readHtml(conf.error_pages[405])).empty())
+		error_405 = readHtml("405.html");
+	error_405p2 = readHtml("405p2.html");
+	if ((error_404 = readHtml(conf.error_pages[404])).empty())
+		error_404 = readHtml("404.html");
+	if ((error_403 = readHtml(conf.error_pages[403])).empty())
+		error_403 = readHtml("403.html");
+	error_204 = readHtml("204.html");
+	error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
+				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
+				"id=\"header\"><h1>413</h1></header></body></html>";
 }
 
 std::string		Response::readHtml(const std::string& path)
@@ -86,13 +103,12 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 	std::cout << Path << "\n";
 	t_server_config conf = config.getConfigByName(request.getHeader("Host"));
 	std::string host = request.getHeader("Host");
-    //SetPath(request.getUrl());
 	if (!(redirect))
 	{
 		if (request.getBody().size() > std::atoi(config.getBufferSize(request
 		.getHeader(host), request.getUrl()).c_str()))
 			ResponseMsg = BodiLimit();
-		if (file_exist(Path) == 1)
+		else if (file_exist(Path) == 1)
 		{
 			if (find_str_in_vector(config.getAllowMethodsForUrl(host,Path),request.getMethod()))
 			{
@@ -105,9 +121,6 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 			}
 			else
 				ResponseMsg = response_405(config, host);
-//						"HTTP/1.1 405 Method Not Allowed\nContent-Type: "
-//							  "Method Not Allowed\nContent-Length:  " +
-//							  std::to_string(error_403.size()) + "\n\n" +error_403;
 		}
 		else if (file_exist(Path) == 2){
 			if (config.getAutoIndex(request.getHeader ("Host"), request.getUrl()))
@@ -134,19 +147,25 @@ void            Response::POSTResponse(Request  &request, ConfigServer& config)
 	if (config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty() && request.getHeader("Content-Type")
 	.find( "multipart/form-data") != std::string::npos)
 	{
-		std::cout<<"\n\n\n\n\n\n\n\nEEEE\n\n\n\n\n\n\n\n";
-		setBoundary(request);
-		setPostHeader(request);
-		std::cout<<postFileName<<"\n\n";
-		setPostBody(request);
+		fileacceptance(request);
+		GETResponse();
 	}
-	else
+	else if (!(config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
 	{
 		CGIClass cgi(request);
 		Html_text = cgi.startCGI(request);
-//		std::cout<<Html_text;
 		ResponseMsg = Html_text;
 	}
+}
+
+void			Response::fileacceptance(Request &request)
+{
+	setBoundary(request);
+	setPostHeader(request);
+	setPostBody(request);
+	std::ofstream outfile (postFileName);
+	outfile << postFileData << std::endl;
+	outfile.close();
 }
 
 void            Response::GETResponse()
@@ -218,30 +237,23 @@ void 			Response::setBoundary(Request  &request)
 {
 	int i = request.getHeader("Content-Type")
 					.find( "boundary=") + 9;
-	//boundary = request.getHeader("Content-Type").substr(i, request.getHeader("Content-Type").size());
-	//std::cout << "CT: " << request.getHeader("Content-Type").size() << " " << request.getHeader("Content-Type").find
-	//m("\n") << "\n";
 	boundary = request.getHeader("Content-Type").substr(i, request.getHeader("Content-Type").size() - i - 1);
 }
 
 void 			Response::setPostHeader(Request &request)
 {
 	int nameS = request.getBody().find("filename=") + 10;
-	int nameF = request.getBody().find("Type:");
-	postFileName = request.getBody().substr(nameS, 9);
-
+	int nameF = request.getBody().find("Content-Type") - 3;
+	postFileName = request.getBody().substr(nameS, nameF - nameS);
 }
 
 void 			Response::setPostBody(Request &request)
 {
-	std::cout << "start\n\n";
 	std::string body = request.getBody();
 	int ct = body.find("Content-Type");
 	int start = body.find("\n", ct);
 	int size = body.find(boundary, start);
 	postFileData = body.substr(start, size - start - 2);
-	//std::cout << "test " << body.substr(start, body.size()) << "\n";
-	std::cout << "pfdstart " << postFileData << " pfd\n";
 }
 
 std::string		Response::response_405(ConfigServer& config, std::string host)

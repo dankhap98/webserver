@@ -31,6 +31,8 @@ private:
 	void			setBoundary(Request  &request);
 	void 			setPostHeader(Request  &request);
 	void 			setPostBody(Request  &request);
+	void 			fileacceptance(Request &request);
+	void			setErrorpages(t_server_config &conf);
 
 	std::string		response_405(ConfigServer& config, std::string host);//It's ok? by ncammy
 

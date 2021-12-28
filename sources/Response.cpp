@@ -205,23 +205,28 @@ void 			Response::setBoundary(Request  &request)
 {
 	int i = request.getHeader("Content-Type")
 					.find( "boundary=") + 9;
-	boundary = request.getHeader("Content-Type").substr(i, request.getHeader("Content-Type").size());
+	//boundary = request.getHeader("Content-Type").substr(i, request.getHeader("Content-Type").size());
+	//std::cout << "CT: " << request.getHeader("Content-Type").size() << " " << request.getHeader("Content-Type").find
+	//m("\n") << "\n";
+	boundary = request.getHeader("Content-Type").substr(i, request.getHeader("Content-Type").size() - i - 1);
 }
 
 void 			Response::setPostHeader(Request &request)
 {
-//	int nameS = request.getBody().find("filename=") + 10;
-//	int nameF = request.getBody().find("Type:");
-//	postFileName = request.getBody().substr(nameS, 9);
-	postFileName = "a.txt";
+	int nameS = request.getBody().find("filename=") + 10;
+	int nameF = request.getBody().find("Type:");
+	postFileName = request.getBody().substr(nameS, 9);
+
 }
 
 void 			Response::setPostBody(Request &request)
 {
-	std::cout << "start";
-	int start = request.getBody().find("\n\n");
-//	int size = request.getBody().length() - boundary.length();
-	std::cout << start;
-	postFileData = request.getBody().substr(start, 100);
-	std::cout << postFileData;
+	std::cout << "start\n\n";
+	std::string body = request.getBody();
+	int ct = body.find("Content-Type");
+	int start = body.find("\n", ct);
+	int size = body.find(boundary, start);
+	postFileData = body.substr(start, size - start - 2);
+	//std::cout << "test " << body.substr(start, body.size()) << "\n";
+	std::cout << "pfdstart " << postFileData << " pfd\n";
 }

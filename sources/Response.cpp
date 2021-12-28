@@ -12,6 +12,8 @@ Response::Response() {
 Response::Response(ConfigServer &config) {
 	t_server_config conf = config.getConfig()[0];
     open_err = false;
+	error_405 = readHtml("405.html");
+	error_405p2 = readHtml("405p2.html");
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
@@ -23,6 +25,8 @@ Response::Response(ConfigServer &config, Request& req) {
     if (redirect)
 		true_path = config.getRedirect(req.getHeader("Host"), req.getUrl());
 	open_err = false;
+	error_405 = readHtml("405.html");
+	error_405p2 = readHtml("405p2.html");
     error_404 = readHtml(conf.error_pages[404]);
     error_403 = readHtml("403.html");
     error_204 = readHtml("204.html");
@@ -80,25 +84,34 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
         return ;
     }
 	std::cout << Path << "\n";
+	t_server_config conf = config.getConfigByName(request.getHeader("Host"));
+	std::string host = request.getHeader("Host");
     //SetPath(request.getUrl());
 	if (!(redirect))
 	{
-		if (request.getBody().size() > std::atoi(config.getBufferSize(request.getHeader("Host"), request.getUrl()).c_str()))
+		if (request.getBody().size() > std::atoi(config.getBufferSize(request
+		.getHeader(host), request.getUrl()).c_str()))
 			ResponseMsg = BodiLimit();
 		if (file_exist(Path) == 1)
 		{
-			if (request.getMethod() == "GET" && request.getParams().empty())
-				GETResponse();
-			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
-				POSTResponse(request, config);
-			else if (request.getMethod() == "DELETE")
-				DELETEResponse();
+			if (find_str_in_vector(config.getAllowMethodsForUrl(host,Path),request.getMethod()))
+			{
+				if (request.getMethod() == "GET" && request.getParams().empty())
+					GETResponse();
+				else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
+					POSTResponse(request, config);
+				else if (request.getMethod() == "DELETE")
+					DELETEResponse();
+			}
+			else
+				ResponseMsg = response_405(config, host);
+//						"HTTP/1.1 405 Method Not Allowed\nContent-Type: "
+//							  "Method Not Allowed\nContent-Length:  " +
+//							  std::to_string(error_403.size()) + "\n\n" +error_403;
 		}
 		else if (file_exist(Path) == 2){
 			if (config.getAutoIndex(request.getHeader ("Host"), request.getUrl()))
 			{
-				t_server_config conf = config.getConfigByName(
-						request.getHeader("Host"));
 				std::string autoindex_html = autoindex(Path, conf.props["root"].length());
 				ResponseMsg ="HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
 						+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
@@ -224,4 +237,18 @@ void 			Response::setPostBody(Request &request)
 	std::cout << start;
 	postFileData = request.getBody().substr(start, 100);
 	std::cout << postFileData;
+}
+
+std::string		Response::response_405(ConfigServer& config, std::string host)
+{
+	std::string str = "HTTP/1.1 405 Method Not Allowed\nContent-Type: Method Not Allowed\nContent-Length:  ";
+	std::string body = error_405;
+	int i = config.getAllowMethodsForUrl(host, Path).size();
+	while (i > 0)
+		body += config.getAllowMethodsForUrl(host, Path)[--i] + " ";
+	body += error_405p2;
+	str += std::to_string(body.size()) + "\n\n" + body;
+	std::cout << "------------------------\n" << error_405p2 <<
+	"\n----------------------\n";
+	return str;
 }

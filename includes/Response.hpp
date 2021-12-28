@@ -32,6 +32,8 @@ private:
 	void 			setPostHeader(Request  &request);
 	void 			setPostBody(Request  &request);
 
+	std::string		response_405(ConfigServer& config, std::string host);//It's ok? by ncammy
+
     std::string     ResponseMsg;
     std::string     Html_text;
     std::string     Path;
@@ -43,6 +45,8 @@ private:
 
 
 	std::string 	error_413;
+	std::string 	error_405;
+	std::string 	error_405p2;
     std::string     error_404;
     std::string     error_403;
     std::string     error_204;

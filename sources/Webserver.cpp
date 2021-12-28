@@ -208,38 +208,31 @@ void    Webserver::receive_data(int i, int& close_conn)
     int rc;
 
 	rc = recv(i, buffer.data(), buffer.size(), 0);
-    while (TRUE)
+
+    if (rc > 0)
     {
-            if (rc > 0)
-            {
-                std::cout << "  recv() succes\n";
-                request.parseRequest(buffer.data());
-                Response response(*cs, request);
-                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
-                if (rc < 0)
-                {
-                    perror("  send() failed");
-                    close_conn = TRUE;
-                    break;
-                }
-                break;
-            }
-            if (rc == 0)
-            {
-                std::cout << "  Connection closed\n";
-                close_conn = TRUE;
-                break;
-            }
-            if (rc < 0)
-            {
-                if (errno != EWOULDBLOCK)
-                {
-                    perror("  recv() failed");
-                    close_conn = TRUE;
-                }
-                break;
-            }
-        break;
+        std::cout << "  recv() succes\n";
+        request.parseRequest(buffer.data());
+        Response response(*cs, request);
+        rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+        if (rc < 0)
+        {
+            perror("  send() failed");
+            close_conn = TRUE;
+        }
+    }
+    if (rc == 0)
+    {
+        std::cout << "  Connection closed\n";
+        close_conn = TRUE;
+    }
+    if (rc < 0)
+    {
+        if (errno != EWOULDBLOCK)
+        {
+            perror("  recv() failed");
+            close_conn = TRUE;
+        }
     }
 }
 

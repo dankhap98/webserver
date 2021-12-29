@@ -9,7 +9,7 @@ CGIClass::CGIClass() {
 }
 
 CGIClass::~CGIClass() {
-	delete argv;
+//	delete argv;
 }
 
 CGIClass::CGIClass(Request &request) {
@@ -34,7 +34,7 @@ void    CGIClass::SetEviroment(Request &request)
 //    RequestEnviroment["REMOTE_IDENT"]  = "";
 //    RequestEnviroment["REMOTE_USER"] = "";
     RequestEnviroment["REQUEST_METHOD"] = request.getMethod();
-//    RequestEnviroment["SCRIPT_NAME"] =
+    RequestEnviroment["SCRIPT_NAME"] = "cgi_tester";
 //    RequestEnviroment["SERVER_NAME"] =
 //    RequestEnviroment["SERVER_PORT"] =
     RequestEnviroment["SERVER_PROTOCOL"] = "HTTP/1.1";
@@ -90,15 +90,17 @@ std::string	CGIClass::startCGI(Request &rec)
 	//
 	//
 	//
-	std::ofstream		file;
-	std::stringstream	buffer;
-
-	file.open("mdeep/test.html", std::ifstream::in);
-	if (file.is_open() == false)
-		return ("<!DOCTYPE html>\n<html><title>40404</title><body>There was an error finding your error page</body></html>\n");
-
-	buffer << file.rdbuf();
-	file.close();
+//	std::ofstream		file;
+//	std::stringstream	buffer;
+//
+//	file.open("mdeep/test/test.html", std::ifstream::in);
+//	if (file.is_open() == false)
+//		std::cerr << "WHAT";
+//	else
+//	{
+//		buffer << file.rdbuf();
+//		file.close();
+//	}
 	//
 	//
 	//
@@ -108,9 +110,10 @@ std::string	CGIClass::startCGI(Request &rec)
 	pid = fork();
 	if (pid == 0)
 	{
+		std::cout << buffer.str();
 		dup2(fdOut[1], 1);
 		dup2(fdIn[0], 0);
-		write(fdIn[1], buffer.str().c_str(), buffer.str().length());
+		write(fdIn[1], rec.getParams(), buffer.str().length());
 		close(fdIn[1]);
 		close(fdOut[0]);
 		execve(argv[0], NULL, RequestEnviromentForExec);
@@ -127,13 +130,14 @@ std::string	CGIClass::startCGI(Request &rec)
 		close(fdIn[1]);
 		while (1)
 		{
-			read(fdOut[0], &b, 1);
-			bufferOut = bufferOut + b;
 			if (waitpid(pid, &status, WNOHANG) > 0)
 				break;
+			read(fdOut[0], &b, 1);
+			bufferOut = bufferOut + b;
 		}
 		close(fdOut[0]);
 	}
+	std::cout << bufferOut;
 	delete RequestEnviromentForExec;
 	return (bufferOut);
 }

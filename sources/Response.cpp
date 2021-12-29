@@ -126,11 +126,15 @@ void            Response::POSTResponse(Request  &request, ConfigServer& config)
 			ResponseMsg = "HTTP/1.1 201 Created\nContent-Type: " + content_type + "\nContent-Length:  " +
 					std::to_string(Html_text.size()) + "\n\n" + Html_text;
 	}
-	else if (!(config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
+//	else (!(config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
+	else
 	{
 		CGIClass cgi(request);
 		Html_text = cgi.startCGI(request);
-		ResponseMsg = Html_text;
+		std::cout << "\n\nCGI Resp: " << Html_text;
+		ResponseMsg = "HTTP/1.1 201 Created\nContent-Type: tex/html\nContent-Length:  " +
+				std::to_string(Html_text.size()) + "\n\n" + Html_text;;
+		std::cout << "\n\nresponse:" << ResponseMsg;
 	}
 }
 

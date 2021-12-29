@@ -13,24 +13,27 @@
 
 class Response {
 public:
-    Response();
     Response(ConfigServer &config);
     Response(ConfigServer &config, Request& req);
     ~Response();
 
     void            SetContentType();
     void            SetResponseMsg(Request &request, ConfigServer& config);
-    void            SetPath(std::string url);
     void            GETResponse();
     void            POSTResponse(Request  &request, ConfigServer& config);
     void            DELETEResponse();
 	std::string		BodiLimit();
     std::string		readHtml(const std::string& path);
     std::string     GetResponseMsg();
+
 private:
+	Response();
+
 	void			setBoundary(Request  &request);
 	void 			setPostHeader(Request  &request);
 	void 			setPostBody(Request  &request);
+	void 			fileacceptance(Request &request);
+	void			setErrorpages(t_server_config &conf);
 
 	std::string		response_405(ConfigServer& config, std::string host);//It's ok? by ncammy
 

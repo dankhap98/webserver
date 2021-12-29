@@ -207,43 +207,32 @@ void    Webserver::receive_data(int i, int& close_conn)
     std::vector<char> buffer(5000);
     int rc;
 
-    while (TRUE)
+	rc = recv(i, buffer.data(), buffer.size(), 0);
+
+    if (rc > 0)
     {
-        rc = recv(i, buffer.data(), buffer.size(), 0);
-            if (rc > 0)
-            {
-                std::cout << "  recv() succes\n";
-				//std::cout << "unparsed " << buffer.data() << "\n";
-                request.parseRequest(buffer.data());
-                request.show();
-                Response response(*cs, request);
-//				std::cout << response.GetResponseMsg().length() << "\n\n\n\n\n";
-                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
-//				rc = send_all(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
-                if (rc < 0)
-                {
-                    perror("  send() failed");
-                    close_conn = TRUE;
-                    break;
-                }
-                break;
-            }
-            if (rc == 0)
-            {
-                std::cout << "  Connection closed\n";
-                close_conn = TRUE;
-                break;
-            }
-            if (rc < 0)
-            {
-                if (errno != EWOULDBLOCK)
-                {
-                    perror("  recv() failed");
-                    close_conn = TRUE;
-                }
-                break;
-            }
-        break;
+        std::cout << "  recv() succes\n";
+        request.parseRequest(buffer.data());
+        Response response(*cs, request);
+        rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+        if (rc < 0)
+        {
+            perror("  send() failed");
+            close_conn = TRUE;
+        }
+    }
+    if (rc == 0)
+    {
+        std::cout << "  Connection closed\n";
+        close_conn = TRUE;
+    }
+    if (rc < 0)
+    {
+        if (errno != EWOULDBLOCK)
+        {
+            perror("  recv() failed");
+            close_conn = TRUE;
+        }
     }
 }
 

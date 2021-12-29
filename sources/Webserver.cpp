@@ -238,7 +238,7 @@ void    Webserver::receive_data(int i, int& close_conn)
 
 int		Webserver::send_all(int socket, const void *buffer, size_t length, int flags)
 {
-	int ret, bytes = 0;
+	size_t ret, bytes = 0;
 	while (bytes < length) {
 		std::cout<<"SEND\n";
 		if (ret <= 0)

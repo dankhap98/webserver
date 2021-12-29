@@ -46,6 +46,7 @@ void    CGIClass::SetEviroment(Request &request)
 
 void    CGIClass::SetArguments(Request &request)
 {
+	(void)request;
 //	int i = 1;
 //	std::map<std::string, std::string>::iterator it = request.getParams().begin();
 //	std::map<std::string, std::string>::iterator end = request.getParams().end();
@@ -80,7 +81,7 @@ std::string	CGIClass::startCGI(Request &rec)
 {
 	pid_t pid;
 	int fdIn[2], fdOut[2];
-	int fdOldIn, fdOldOut;
+//	int fdOldIn, fdOldOut;
 
 	if ((pipe(fdIn) != 0 )|| (pipe(fdOut) != 0))
 	{

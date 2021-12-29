@@ -213,8 +213,9 @@ void    Webserver::receive_data(int i, int& close_conn)
             if (rc > 0)
             {
                 std::cout << "  recv() succes\n";
+                std::cout << buffer.data() << "\n";
                 request.parseRequest(buffer.data());
-                request.show();
+                //request.show();
                 Response response(*cs, request);
 				//std::cout<<response.GetResponseMsg();
                 rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().length(), 0);

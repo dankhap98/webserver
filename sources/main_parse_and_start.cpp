@@ -49,9 +49,8 @@ int    main(int argc, char  **argv)
             i++;
         }
     }
-    catch(std::exception e)
+    catch(std::exception& e)
     {
-        delete conf;
         std::cout << e.what() << "\n";
     }
     delete conf;

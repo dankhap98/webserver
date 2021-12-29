@@ -32,20 +32,47 @@ Response::~Response() {
 
 void Response::setErrorpages(t_server_config &conf)
 {
-	if ((error_405 = readHtml(conf.error_pages[405])).empty())
+	if (conf.error_pages[405].empty())
 		error_405 = readHtml("405.html");
+	else
+		error_405 = readHtml(conf.error_pages[405]);
 	error_405p2 = readHtml("405p2.html");
-	if ((error_404 = readHtml(conf.error_pages[404])).empty())
+	if (conf.error_pages[404].empty())
 		error_404 = readHtml("404.html");
-
-	if ((error_403 = readHtml(conf.error_pages[403])).empty())
+	else
+		error_404 = readHtml(conf.error_pages[404]);
+	if (conf.error_pages[403].empty())
 		error_403 = readHtml("403.html");
-	if ((error_204 = readHtml(conf.error_pages[204])).empty())
+	else
+		error_403 = readHtml(conf.error_pages[403]);
+	if (conf.error_pages[204].empty())
 		error_204 = readHtml("204.html");
-	if ((error_413 = readHtml(conf.error_pages[204])).empty())
-		error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
-				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
-				"id=\"header\"><h1>413</h1></header></body></html>";
+	else
+		error_204 = readHtml(conf.error_pages[204]);
+	if (conf.error_pages[413].empty())
+		error_413 = readHtml("413.html");
+	else
+		error_413 = readHtml(conf.error_pages[413]);
+
+//
+//	if ((error_404 = readHtml(conf.error_pages[404])).empty())
+//		error_404 = readHtml("404.html");
+//	if ((error_403 = readHtml(conf.error_pages[403])).empty())
+//		error_403 = readHtml("403.html");
+//
+//	if ((error_204 = readHtml(conf.error_pages[204])).empty())
+//	{
+//		error_204 = readHtml("204.html");
+//		std::cout << "------------------------\n" << "conf error: \n"
+//				  <<error_204<<
+//				  "\n----------------------\n";
+//	}
+//	if ((error_413 = readHtml(conf.error_pages[204])).empty())
+//		error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
+//				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
+//				"id=\"header\"><h1>413</h1></header></body></html>";
+
+>>>>>>> a03928f5eb2c8c633fdb7db3913dbd2ec735aece
 }
 
 std::string		Response::readHtml(const std::string& path)
@@ -94,7 +121,6 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 				ResponseMsg = response_405(config, host);
 		}
 		else if (file_exist(Path) == 2){
-
 			if (config.getAutoIndex(host, request.getUrl()))
 			{
 				std::string autoindex_html = autoindex(Path, conf.props["root"].length());
@@ -103,11 +129,15 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 			}
 			else
 			{
+<<<<<<< HEAD
+=======
+				std::cout << "----------------------\n 403 "
+							 "forbidden\n---------------\n";
+>>>>>>> a03928f5eb2c8c633fdb7db3913dbd2ec735aece
 				ResponseMsg =
 						"HTTP/1.1 403 Forbidden\nContent-Type: Forbidden\nContent-Length:  " +
 						std::to_string(error_403.size()) + "\n\n" + error_403;
 			}
-
 		}
 		else
 			ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type + "\nContent-Length:  " +

@@ -132,7 +132,7 @@ void    Request::parseChunk(std::string request, bool is_first)
 		this->_body += chunks.substr(pos + 1, len);
         //pos++;
         start = pos + 2 + len;
-        if (start >= chunks.size())
+        if (start >= (int)chunks.size())
             return ;
         //std::cout << this->_body << "\n";
 		//i += chunksize + 2;
@@ -190,7 +190,7 @@ void    Request::parseRequest(std::string request)
             this->parseChunk(request, first);
             return ;
         }
-    if (getMethod() == "POST" && npos > 0)
+    if (getMethod() == "POST" && npos > 0 && request.find("multipart/form-data") == std::string::npos)
     {
         start = npos + 1;
         npos = request.find_first_of("\n", start);

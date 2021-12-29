@@ -46,8 +46,8 @@ Webserver::Webserver()
    max_sd = listen_sd;
    FD_SET(listen_sd, &master_set);
 
-   timeout.tv_sec  = 14;
-   timeout.tv_usec = 0;
+   timeout.tv_sec  = 2;
+   timeout.tv_usec = 50000;
 
    std::cout << "Server created\n";
 }
@@ -64,15 +64,15 @@ Webserver::Webserver(ConfigServer& conf_s)
     if((setsockopt(listen_sd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on))) < 0)
         check_errors(-1, "setsockopt() failed", 1);
 
-    if((ioctl(listen_sd, FIONBIO, (char *)&on)) < 0)
-        check_errors(-1, "ioctl() failed", 1);
+//    if((ioctl(listen_sd, FIONBIO, (char *)&on)) < 0)
+if (fcntl(listen_sd, F_SETFL, O_NONBLOCK) == -1) {
+		std::cerr << "Error using fcntl" << std::endl;
+	}
+//        check_errors(-1, "ioctl() failed", 1);
 
     memset((char *)&_addr, 0, sizeof(_addr));
     _addr.sin_family = AF_INET;
-    //_addr.sin_addr.s_addr = cs->getIpAddressInt();
     _addr.sin_addr.s_addr = htonl(cs->getIpAddressInt());
-    //_addr.sin_addr.s_addr = INADDR_ANY;
-    //_addr.sin_addr.s_addr = htonl(cs->getConfig()[0].props["server_name"].c_str());
     _addr.sin_port = htons(port);
     if (bind(listen_sd, (struct sockaddr *)&_addr, sizeof(_addr)) == -1)
     {
@@ -89,7 +89,7 @@ Webserver::Webserver(ConfigServer& conf_s)
         max_sd = listen_sd;
         FD_SET(listen_sd, &master_set);
         std::cout << "Sever created!";
-        timeout.tv_sec = 1;
+        timeout.tv_sec = 1000000;
         timeout.tv_usec = 0;
     }
 }
@@ -207,42 +207,58 @@ void    Webserver::receive_data(int i, int& close_conn)
     std::vector<char> buffer(5000);
     int rc;
 
-    while (TRUE)
+	rc = recv(i, buffer.data(), buffer.size(), 0);
+
+    if (rc > 0)
     {
-        rc = recv(i, buffer.data(), buffer.size(), 0);
-            if (rc > 0)
-            {
-                std::cout << "  recv() succes\n";
-                std::cout << buffer.data() << "\n";
-                request.parseRequest(buffer.data());
-                //request.show();
-                Response response(*cs, request);
-				//std::cout<<response.GetResponseMsg();
-                rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().length(), 0);
-                if (rc < 0)
-                {
-                    perror("  send() failed");
-                    close_conn = TRUE;
-                    break;
-                }
-                break;
-            }
-            if (rc == 0)
-            {
-                std::cout << "  Connection closed\n";
-                close_conn = TRUE;
-                break;
-            }
-            if (rc < 0)
-            {
-                if (errno != EWOULDBLOCK)
-                {
-                    perror("  recv() failed");
-                    close_conn = TRUE;
-                }
-                break;
-            }
-        break;
+
+        std::cout << "  recv() succes\n";
+        request.parseRequest(buffer.data());
+        Response response(*cs, request);
+        rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+        if (rc < 0)
+        {
+            perror("  send() failed");
+            close_conn = TRUE;
+        }
+    }
+    else if (rc == 0)
+    {
+        std::cout << "  Connection closed"<<i <<"\n";
+        close_conn = TRUE;
+    }
+    else if (rc < 0)
+    {
+        if (errno != EWOULDBLOCK)
+        {
+            perror("  recv() failed");
+            close_conn = TRUE;
+        }
     }
 }
 
+int		Webserver::send_all(int socket, const void *buffer, size_t length, int flags)
+{
+	size_t ret, bytes = 0;
+	while (bytes < length) {
+		std::cout<<"SEND\n";
+		if (ret <= 0)
+			return -1;
+		ret = send(socket, (char *)buffer+bytes, length-bytes, flags);
+		//check for errors
+		bytes+=ret;
+	}
+	return (0);
+}
+//	ssize_t n;
+//	const char *p = (char *)buffer;
+//	while (length > 0)
+//	{
+//		n = send(socket, p, length, flags);
+//		if (n <= 0)
+//			return -1;
+//		p += n;
+//		length -= n;
+//	}
+//	return 0;
+//}

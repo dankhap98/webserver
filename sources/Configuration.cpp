@@ -403,3 +403,4 @@ bool    Configuration::valid_size(std::string lsize)
     }
     return (1);
 }
+

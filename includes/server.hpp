@@ -14,6 +14,7 @@
 #include <map>
 #include <unistd.h> // For read
 #include <sys/ioctl.h>
+#include <fcntl.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/stat.h>

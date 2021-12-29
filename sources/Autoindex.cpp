@@ -26,8 +26,6 @@ std::string getFileModificationTime(std::string url, const char *path)
 
 std::string getFileSize(std::string url, const char *path)
 {
-	if (url.back() != '/')
-		url += "/";
 	url += path;
 	struct stat elem;
 	if (stat(url.c_str(), &elem) == 0)
@@ -70,8 +68,6 @@ std::string autoindex(std::string url, int root){
 		page += "<tr><td><a href=\"";
 		page += cut_url(url_without_root);
 		page += "\"> ../ </a></td></tr>";
-		if (url.back() != '/')
-			url += "/";
 		while ((ent = readdir(dir)) != NULL){
 			if (ent->d_name[0] == '.')
 				continue;
@@ -90,4 +86,12 @@ std::string autoindex(std::string url, int root){
 		return page;
 	}
 	return NULL;
+}
+
+bool find_str_in_vector(const std::vector<std::string>& source, std::string
+key){
+	std::vector<std::string>::const_iterator it = std::find(source.begin(),source.end(), key);
+	if (it == source.end())
+		return 0;
+	return 1;
 }

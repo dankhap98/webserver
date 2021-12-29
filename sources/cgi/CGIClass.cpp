@@ -9,8 +9,7 @@ CGIClass::CGIClass() {
 }
 
 CGIClass::~CGIClass() {
-	delete RequestEnviromentForExec;
-	double argv;
+//	delete argv;
 }
 
 CGIClass::CGIClass(Request &request) {
@@ -22,7 +21,7 @@ CGIClass::CGIClass(Request &request) {
 
 void    CGIClass::SetEviroment(Request &request)
 {
-	RequestEnviromentForExec = new char *[9];
+	RequestEnviromentForExec = new char *[11];
 //    RequestEnviroment["AUTH_TYPE"] = "";
     RequestEnviroment["CONTENT_LENGTH"] = request.getBody().length();
     RequestEnviroment["CONTENT_TYPE"] = request.getHeaders()["Content-Type"];
@@ -35,18 +34,20 @@ void    CGIClass::SetEviroment(Request &request)
 //    RequestEnviroment["REMOTE_IDENT"]  = "";
 //    RequestEnviroment["REMOTE_USER"] = "";
     RequestEnviroment["REQUEST_METHOD"] = request.getMethod();
-//    RequestEnviroment["SCRIPT_NAME"] =
+    RequestEnviroment["SCRIPT_NAME"] = "cgi_tester";
 //    RequestEnviroment["SERVER_NAME"] =
 //    RequestEnviroment["SERVER_PORT"] =
     RequestEnviroment["SERVER_PROTOCOL"] = "HTTP/1.1";
 //    RequestEnviroment["SERVER_SOFTWARE"] =
 	std::map<std::string, std::string>::iterator it = RequestEnviroment.begin();
-	for (int i = 0; i < 9; i++, it++)
+	for (int i = 0; i < 10; i++, it++)
 		RequestEnviromentForExec[i] = strdup((it->first + "=" + it->second).c_str());
+	RequestEnviromentForExec[10] = (char*)0;
 }
 
 void    CGIClass::SetArguments(Request &request)
 {
+	(void)request;
 //	int i = 1;
 //	std::map<std::string, std::string>::iterator it = request.getParams().begin();
 //	std::map<std::string, std::string>::iterator end = request.getParams().end();
@@ -60,61 +61,33 @@ void    CGIClass::SetArguments(Request &request)
 //		std::cout<<"fiasko\n";
 //	}
 //	it = request.getParams().begin();
-	argv = new char *[2];
-	argv[0] = strdup(("mdeep/" + RequestEnviroment["PATH_INFO"]).c_str());
-//	for (int iter = 1; iter != i; iter++)
-//		argv[i] = strdup(it->second.c_str());
+	argv = new char *[3];
+	argv[0] = strdup(("mdeep" + RequestEnviroment["PATH_INFO"]).c_str());
 	argv[1] = strdup("test.html");
+	argv[2] = (char*)0;
 }
-
-void 	CGIClass::RunCGI()
-{
-	if (!execve(argv[0], argv, RequestEnviromentForExec))
-	{
-		std::cerr<<"GG";
-		exit(1);
-	}
-}
-
 
 std::string	CGIClass::startCGI(Request &rec)
 {
 	pid_t pid;
 	int fdIn[2], fdOut[2];
-	int fdOldIn, fdOldOut;
 
 	if ((pipe(fdIn) != 0 )|| (pipe(fdOut) != 0))
 	{
 		std::cerr << "Cannot create CGI pipe\n";
 		exit(1);
 	}
-	//
-	//
-	//
-	std::ofstream		file;
-	std::stringstream	buffer;
-
-	file.open("mdeep/test.html", std::ifstream::in);
-	if (file.is_open() == false)
-		return ("<!DOCTYPE html>\n<html><title>40404</title><body>There was an error finding your error page</body></html>\n");
-
-	buffer << file.rdbuf();
-	file.close();
-	//
-	//
-	//
-//	fdOldIn = dup(fileno(stdin));
-//	fdOldOut = dup(fileno(stdout));
 	char b;
 	pid = fork();
 	if (pid == 0)
 	{
 		dup2(fdOut[1], 1);
 		dup2(fdIn[0], 0);
-		write(fdIn[1], buffer.str().c_str(), buffer.str().length());
+		write(fdIn[1], rec.getParamsRaw().c_str(), 9);
 		close(fdIn[1]);
 		close(fdOut[0]);
-		execve(argv[0], NULL, RequestEnviromentForExec);
+		execve(argv[0], argv, RequestEnviromentForExec);
+
 		close(fdIn[0]);
 		close(fdOut[1]);
 		exit(1);
@@ -135,6 +108,7 @@ std::string	CGIClass::startCGI(Request &rec)
 		}
 		close(fdOut[0]);
 	}
+	delete RequestEnviromentForExec;
 	return (bufferOut);
 }
 

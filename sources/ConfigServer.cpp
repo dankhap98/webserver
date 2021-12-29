@@ -3,9 +3,9 @@
 ConfigServer::ConfigServer(): config(), ip_address(), port()
 {
     t_server_config conf;
-    conf.error_pages[404] = "/";
-    conf.error_pages[403] = "/";
-    conf.error_pages[500] = "/";
+//    conf.error_pages[404] = "/";
+//    conf.error_pages[403] = "/";
+//    conf.error_pages[500] = "/";
     this->config.push_back(conf);
 }
 

@@ -32,12 +32,12 @@ Response::~Response() {
 
 void Response::setErrorpages(t_server_config &conf)
 {
-
 	if ((error_405 = readHtml(conf.error_pages[405])).empty())
 		error_405 = readHtml("405.html");
 	error_405p2 = readHtml("405p2.html");
 	if ((error_404 = readHtml(conf.error_pages[404])).empty())
 		error_404 = readHtml("404.html");
+
 	if ((error_403 = readHtml(conf.error_pages[403])).empty())
 		error_403 = readHtml("403.html");
 	if ((error_204 = readHtml(conf.error_pages[204])).empty())
@@ -46,7 +46,6 @@ void Response::setErrorpages(t_server_config &conf)
 		error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
 				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
 				"id=\"header\"><h1>413</h1></header></body></html>";
-
 }
 
 std::string		Response::readHtml(const std::string& path)
@@ -73,17 +72,16 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
         std::cerr<<"Request parsing error\n";
         return ;
     }
-	std::cout << Path << "\n";
 	t_server_config conf = config.getConfigByName(request.getHeader("Host"));
 	std::string host = request.getHeader("Host");
 	if (!(redirect))
 	{
-		if (request.getBody().size() > std::atoi(config.getBufferSize(request
-		.getHeader(host), request.getUrl()).c_str()))
+		if ((int)request.getBody().size() > std::atoi(config.getBufferSize(request.getHeader(host), request.getUrl()).c_str()))
 			ResponseMsg = BodiLimit();
 		else if (file_exist(Path) == 1)
 		{
-			if (find_str_in_vector(config.getAllowMethodsForUrl(host,Path),request.getMethod()))
+			if (!config.getAllowMethodsForUrl(host,Path).size() ||
+			find_str_in_vector(config.getAllowMethodsForUrl(host,Path),request.getMethod()))
 			{
 				if (request.getMethod() == "GET" && request.getParams().empty())
 					GETResponse();
@@ -96,15 +94,20 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 				ResponseMsg = response_405(config, host);
 		}
 		else if (file_exist(Path) == 2){
-			if (config.getAutoIndex(request.getHeader ("Host"), request.getUrl()))
+
+			if (config.getAutoIndex(host, request.getUrl()))
 			{
 				std::string autoindex_html = autoindex(Path, conf.props["root"].length());
 				ResponseMsg ="HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
 						+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
 			}
 			else
-				ResponseMsg = "HTTP/1.1 403 Forbidden\nContent-Type: Forbidden\nContent-Length:  " +
-							  std::to_string(error_403.size()) + "\n\n" +error_403;
+			{
+				ResponseMsg =
+						"HTTP/1.1 403 Forbidden\nContent-Type: Forbidden\nContent-Length:  " +
+						std::to_string(error_403.size()) + "\n\n" + error_403;
+			}
+
 		}
 		else
 			ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type + "\nContent-Length:  " +
@@ -116,8 +119,8 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 
 void            Response::POSTResponse(Request  &request, ConfigServer& config)
 {
-	if (config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty() && request.getHeader("Content-Type")
-	.find( "multipart/form-data") != std::string::npos)
+	(void)config;
+	if (request.getHeader("Content-Type").find( "multipart/form-data") != std::string::npos)
 	{
 		fileacceptance(request);
 		SetContentType();
@@ -126,15 +129,12 @@ void            Response::POSTResponse(Request  &request, ConfigServer& config)
 			ResponseMsg = "HTTP/1.1 201 Created\nContent-Type: " + content_type + "\nContent-Length:  " +
 					std::to_string(Html_text.size()) + "\n\n" + Html_text;
 	}
-//	else (!(config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
+//	else if (!(config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
 	else
 	{
 		CGIClass cgi(request);
 		Html_text = cgi.startCGI(request);
-		std::cout << "\n\nCGI Resp: " << Html_text;
-		ResponseMsg = "HTTP/1.1 201 Created\nContent-Type: tex/html\nContent-Length:  " +
-				std::to_string(Html_text.size()) + "\n\n" + Html_text;;
-		std::cout << "\n\nresponse:" << ResponseMsg;
+		ResponseMsg = "HTTP/1.1 201 Created\n" + Html_text;
 	}
 }
 
@@ -245,7 +245,5 @@ std::string		Response::response_405(ConfigServer& config, std::string host)
 		body += config.getAllowMethodsForUrl(host, Path)[--i] + " ";
 	body += error_405p2;
 	str += std::to_string(body.size()) + "\n\n" + body;
-	std::cout << "------------------------\n" << error_405p2 <<
-	"\n----------------------\n";
 	return str;
 }

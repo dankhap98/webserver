@@ -92,6 +92,8 @@ ConfigServer    Configuration::loadServerConfig(std::ifstream& conf, int *is_exi
             }
             else
             {
+                if (words[0] == "client_body_buffer_size" && !valid_size(words[1]))
+                    throw s_misconfiguration::InvalidBodyLimitException();
                 if (words[0] == "listen" && words.size() == 2)
                 {
                     existed = server_exist(words);
@@ -157,6 +159,12 @@ ConfigLocation  Configuration::loadLocationConfig(std::ifstream& conf)
             }
             else
             {
+                if (words[0] == "client_body_buffer_size" && !valid_size(words[1]))
+                {
+                    words.clear();
+                    line.clear();
+                    throw s_misconfiguration::InvalidBodyLimitException();
+                }
                 if (words.size() == 2)
                     cl.setProperty(words[0], words[1]);
                 else if(words.size() == 1 && words[0] != "}")
@@ -383,3 +391,16 @@ bool    Configuration::valid_port(std::string port)
     }
     return (1);
 }
+
+bool    Configuration::valid_size(std::string lsize)
+{
+    if (lsize.size() == 0)
+        return (0);
+    for (int i=0; i<(int)lsize.size(); i++)
+    {
+        if (lsize[i] < '0' || lsize[i] > '9' || (lsize[i] == '0' && i == 0))
+            return (0);
+    }
+    return (1);
+}
+

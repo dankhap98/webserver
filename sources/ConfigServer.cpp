@@ -151,9 +151,9 @@ ConfigLocation  ConfigServer::getConfigLocationByUrl(t_server_config conf, std::
             return (*bg);
         if (loc_url[0] == '*' && url != "/")
         {
-            //TD not 0 index, must be i - index
+            
             loc_url = loc_url.substr(1, loc_url.size() - 1);
-            if (std::count(url.begin(), url.end(), '/') == 1)
+            if (std::count(url.begin(), url.end(), '/') == 1 && url.size() > loc_url.size())
             {
                 std::string tmp_url = url.substr(url.size() - loc_url.size(), loc_url.size());
                 if (loc_url == tmp_url)

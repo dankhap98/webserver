@@ -4,7 +4,8 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <stdexcept>
+//#include <stdexcept>
+#include <exception>
 #include "ConfigServer.hpp"
 #include "ConfigLocation.hpp"
 
@@ -46,6 +47,15 @@ typedef struct  s_misconfiguration
             }
     };
 
+    class InvalidBodyLimitException: public std::exception
+    {
+        public:
+            virtual const   char* what() const throw()
+            {
+                return  ("Invalid client body size property!");
+            }
+    };
+
     class NoListenException: public std::exception
     {
         public:
@@ -60,7 +70,7 @@ typedef struct  s_misconfiguration
         public:
             virtual const   char* what() const throw()
             {
-                return  ("No listen property!");
+                return  ("No index property!");
             }
     };
 
@@ -97,8 +107,9 @@ class Configuration
         void    setPath(const std::string& path);
         void    loadConfig();
 
-         bool    valid_ip(std::string ip);
+        bool    valid_ip(std::string ip);
         bool    valid_port(std::string port);
+        bool    valid_size(std::string lim_size);
 
         //t_misconfiguration misconfig;
         /*class NoFileOpenException: public std::exception

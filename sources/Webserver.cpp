@@ -90,7 +90,7 @@ if (fcntl(listen_sd, F_SETFL, O_NONBLOCK) == -1) {
         FD_SET(listen_sd, &master_set);
         std::cout << "Sever created!";
         timeout.tv_sec = 0;
-        timeout.tv_usec = 200;
+        timeout.tv_usec = 200000;
     }
 }
 
@@ -216,7 +216,7 @@ void    Webserver::receive_data(int i, int& close_conn)
         request.parseRequest(buffer.data());
         Response response(*cs, request);
         rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
-        if (rc < 0)
+        if (rc < 0 || (request.getHeaders().count("Connection") && request.getHeader("Connection") != "keep-alive"))
         {
             perror("  send() failed");
             close_conn = TRUE;

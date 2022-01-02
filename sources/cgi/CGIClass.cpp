@@ -26,7 +26,10 @@ void    CGIClass::SetEviroment(Request &request)
     RequestEnviroment["CONTENT_LENGTH"] = request.getBody().length();
     RequestEnviroment["CONTENT_TYPE"] = request.getHeaders()["Content-Type"];
     RequestEnviroment["GATEWAY_INTERFACE"] = "CGI/1.1";
-    RequestEnviroment["PATH_INFO"] = request.getUrl();
+	if (request.getMethod() == "GET")
+    	RequestEnviroment["PATH_INFO"] = request.getUrl().substr(0,  request.getUrl().find("?"));
+	else
+		RequestEnviroment["PATH_INFO"] = request.getUrl();
     RequestEnviroment["PATH_TRANSLATED"] = "/";
     RequestEnviroment["QUERY_STRING"] = request.getQuery(); //какой он будет при пост?
 //    RequestEnviroment["REMOTE_ADDR"] = request.getHeader()["Host"]; //нужно доделать
@@ -81,83 +84,38 @@ std::string	CGIClass::startCGI(Request &rec)
 	pid = fork();
 	if (pid == 0)
 	{
+		std::cout << rec.getParamsRaw() << std::endl;
 		dup2(fdOut[1], 1);
 		dup2(fdIn[0], 0);
-		write(fdIn[1], rec.getParamsRaw().c_str(), 9);
+
+		write(fdIn[1], rec.getParamsRaw().c_str(), rec.getParamsRaw().length());
 		close(fdIn[1]);
 		close(fdOut[0]);
 		execve(argv[0], argv, RequestEnviromentForExec);
 
 		close(fdIn[0]);
 		close(fdOut[1]);
+		std::cout << argv[0] << "fiasko\n";
+
 		exit(1);
 	}
 	else
 	{
 		close(fdIn[0]);
 		close(fdOut[1]);
-		RequestBody = rec.getParamsRaw();
-//		write(fdIn[1], "addadada", 8);
 		close(fdIn[1]);
+		std::cout << "\n\n";
 		while (1)
 		{
 			if (waitpid(pid, &status, WNOHANG) > 0)
 				break;
 			read(fdOut[0], &b, 1);
+			std::cout << b;
 			bufferOut = bufferOut + b;
 		}
 		close(fdOut[0]);
+		std::cout<<"\n\n";
 	}
 	delete RequestEnviromentForExec;
 	return (bufferOut);
 }
-
-//char*		CGIClass::startCGI(std::string Page)
-//{
-//	pid_t pid;
-//	int fdStdInPipe[2], fdStdOutPipe[2];
-//	fdStdInPipe[0] = fdStdInPipe[1] = fdStdOutPipe[0] = fdStdOutPipe[1] = -1;
-//	if (pipe(fdStdInPipe) != 0 || pipe(fdStdOutPipe) != 0)
-//	{
-//		std::cerr << "Cannot create CGI pipe\n";
-//		exit(1);
-//	}
-//
-//	int fdOldStdIn = dup(fileno(stdin));
-//	int fdOldStdOut = dup(fileno(stdout));
-//
-//	if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
-//		exit(1);
-//	close(fdStdInPipe[0]);
-//	close(fdStdOutPipe[1]);
-//
-//	pid = fork();
-//	if (pid < 0)
-//		exit(1);
-//	else if (!pid)
-//	{
-//		if (!execve(argv[0], argv, RequestEnviromentForExec))
-//		{
-//			std::cerr << "GG";
-//			exit(1);
-//		}
-//	}
-//	dup2(fdOldStdIn, fileno(stdin));
-//	dup2(fdOldStdOut, fileno(stdout));
-//	RequestBody = Page;
-//	write(fdStdInPipe[1], RequestBody.c_str(), RequestBody.length());
-//
-//	while (1)
-//	{
-//		int n = read(fdStdOutPipe[0], bufferOut, 100000);
-//		if (n > 0)
-//		{
-//			fwrite(bufferOut, 1, n, stdout);
-//			fflush(stdout);
-//		}
-//		if (waitpid(pid, &status, WNOHANG) > 0)
-//			break;
-//	}
-//	std::cout<<"--------------abaoba-------------\n"<<bufferOut;
-//	return (bufferOut);
-//}

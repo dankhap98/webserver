@@ -46,8 +46,8 @@ Webserver::Webserver()
    max_sd = listen_sd;
    FD_SET(listen_sd, &master_set);
 
-   timeout.tv_sec  = 2;
-   timeout.tv_usec = 50000;
+   timeout.tv_sec  = 0;
+   timeout.tv_usec = 200;
 
    std::cout << "Server created\n";
 }
@@ -89,8 +89,8 @@ if (fcntl(listen_sd, F_SETFL, O_NONBLOCK) == -1) {
         max_sd = listen_sd;
         FD_SET(listen_sd, &master_set);
         std::cout << "Sever created!";
-        timeout.tv_sec = 1000000;
-        timeout.tv_usec = 0;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 200000;
     }
 }
 
@@ -549,7 +549,7 @@ int    Webserver::send_data(int i, int& close_conn)
     int rc = 0;
     Response response(*cs, requests[i]);
     rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
-    if (rc < 0)
+    if (rc < 0 || (requests[i].getHeaders().count("Connection") && requests[i].getHeader("Connection") != "keep-alive"))
     {
         perror("  send() failed");
         close_conn = TRUE;
@@ -573,7 +573,7 @@ void    Webserver::receive_data(int i, int& close_conn)
         request.parseRequest(buffer.data());
         Response response(*cs, request);
         rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
-        if (rc < 0)
+        if (rc < 0 || (request.getHeaders().count("Connection") && request.getHeader("Connection") != "keep-alive"))
         {
             perror("  send() failed");
             close_conn = TRUE;
@@ -593,29 +593,3 @@ void    Webserver::receive_data(int i, int& close_conn)
         }
     }
 }
-
-int		Webserver::send_all(int socket, const void *buffer, size_t length, int flags)
-{
-	size_t ret, bytes = 0;
-	while (bytes < length) {
-		std::cout<<"SEND\n";
-		if (ret <= 0)
-			return -1;
-		ret = send(socket, (char *)buffer+bytes, length-bytes, flags);
-		//check for errors
-		bytes+=ret;
-	}
-	return (0);
-}
-//	ssize_t n;
-//	const char *p = (char *)buffer;
-//	while (length > 0)
-//	{
-//		n = send(socket, p, length, flags);
-//		if (n <= 0)
-//			return -1;
-//		p += n;
-//		length -= n;
-//	}
-//	return 0;
-//}

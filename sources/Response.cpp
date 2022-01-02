@@ -53,26 +53,6 @@ void Response::setErrorpages(t_server_config &conf)
 		error_413 = readHtml("413.html");
 	else
 		error_413 = readHtml(conf.error_pages[413]);
-
-//
-//	if ((error_404 = readHtml(conf.error_pages[404])).empty())
-//		error_404 = readHtml("404.html");
-//	if ((error_403 = readHtml(conf.error_pages[403])).empty())
-//		error_403 = readHtml("403.html");
-//
-//	if ((error_204 = readHtml(conf.error_pages[204])).empty())
-//	{
-//		error_204 = readHtml("204.html");
-//		std::cout << "------------------------\n" << "conf error: \n"
-//				  <<error_204<<
-//				  "\n----------------------\n";
-//	}
-//	if ((error_413 = readHtml(conf.error_pages[204])).empty())
-//		error_413 = "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-8\"><title>404</title><link rel=\"stylesheet\" "
-//				"href=\"bootstrap.min.css\" type=\"text/css\"/></head><body> <header "
-//				"id=\"header\"><h1>413</h1></header></body></html>";
-
-
 }
 
 std::string		Response::readHtml(const std::string& path)
@@ -128,12 +108,10 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 				ResponseMsg ="HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
 					+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
 			}
-			else
-			{
+			else			
 				ResponseMsg =
-					"HTTP/1.1 403 Forbidden\nContent-Type: Forbidden\nContent-Length:  " +
-					std::to_string(error_403.size()) + "\n\n" + error_403;
-			}
+						"HTTP/1.1 403 Forbidden\nContent-Type: Forbidden\nContent-Length:  " +
+						std::to_string(error_403.size()) + "\n\n" + error_403;
 		}
 		else
 			ResponseMsg = "HTTP/1.1 404 Not found\nContent-Type: " + content_type + "\nContent-Length:  " +

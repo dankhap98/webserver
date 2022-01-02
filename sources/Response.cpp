@@ -81,33 +81,34 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
     }
 	t_server_config conf = config.getConfigByName(request.getHeader("Host"));
 	std::string host = request.getHeader("Host");
+	//std::cout << Path << "\n";
 	if (!(redirect))
 	{
 		if ((int)request.getBody().size() > std::atoi(config.getBufferSize(request.getHeader(host), request.getUrl()).c_str()))
 			ResponseMsg = BodiLimit();
+		else if (config.getAllowMethodsForUrl(host,request.getUrl()).size() > 0 &&
+			!find_str_in_vector(config.getAllowMethodsForUrl(host,request.getUrl()),request.getMethod()))
+			ResponseMsg = response_405(config, host);
 		else if (file_exist(Path) == 1)
 		{
-			if (!config.getAllowMethodsForUrl(host,Path).size() ||
-			find_str_in_vector(config.getAllowMethodsForUrl(host,Path),request.getMethod()))
-			{
-				if (request.getMethod() == "GET" && request.getParams().empty())
-					GETResponse();
-				else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
-					POSTResponse(request, config);
-				else if (request.getMethod() == "DELETE")
-					DELETEResponse();
-			}
-			else
-				ResponseMsg = response_405(config, host);
+			if (request.getMethod() == "GET" && request.getParams().empty())
+				GETResponse();
+			else if (request.getMethod() == "POST" || (request.getMethod() == "GET" && !(request.getParams().empty())))
+				POSTResponse(request, config);
+			else if (request.getMethod() == "DELETE")
+				DELETEResponse();
+			//}
+			//else
+			//	ResponseMsg = response_405(config, host);
 		}
 		else if (file_exist(Path) == 2){
 			if (config.getAutoIndex(host, request.getUrl()))
 			{
 				std::string autoindex_html = autoindex(Path, conf.props["root"].length());
 				ResponseMsg ="HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:  "
-						+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
+					+ std::to_string(autoindex_html.size()) + "\n\n" +autoindex_html;
 			}
-			else
+			else			
 				ResponseMsg =
 						"HTTP/1.1 403 Forbidden\nContent-Type: Forbidden\nContent-Length:  " +
 						std::to_string(error_403.size()) + "\n\n" + error_403;

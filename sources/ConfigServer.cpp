@@ -448,7 +448,6 @@ std::vector<std::string>    ConfigServer::getAllowMethodsForUrl(std::string host
     if (url == "/")
         return am;
 
-
     ConfigLocation cl = this->getConfigLocationByUrl(conf, url);
     if (cl.getUrl().size() > 0)
     {

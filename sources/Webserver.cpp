@@ -120,20 +120,64 @@ void    Webserver::start()
     int close_conn;
     std::string	dot[3] = {".  ", ".. ", "..."};
     int			n = 0;
+    //std::vector<int> _sockets;
+    //std::vector<int> _ready;
 
     while(1) {
         int rc = 0;
         while (rc == 0) {
             memcpy(&(working_set), &(master_set), sizeof(master_set));
             FD_ZERO(&(write_set));
+			//for (std::vector<int>::iterator it = _ready.begin() ; it != _ready.end() ; it++)
+			//	FD_SET(*it, &write_set);
             std::cout << "\rWaiting on select()" << dot[n++] << std::flush;
             if (n == 3)
                 n = 0;
             rc = select(max_sd + 1, &(working_set), NULL, NULL, &(timeout));
 
-            check_descriptors(rc, end_server, close_conn);
+            //check_descriptors(rc, end_server, close_conn);
 
         }
+
+        if (rc > 0)
+            check_descriptors(rc, end_server, close_conn);
+
+        if (rc < 0) {
+            perror("  select() failed");
+            break;
+        }
+    }
+}
+
+void    Webserver::start2()
+{
+    //int end_server = FALSE;
+    int close_conn;
+    std::string	dot[3] = {".  ", ".. ", "..."};
+    int			n = 0;
+    //std::vector<int> _sockets;
+    std::vector<int> _ready;
+
+    while(1) {
+        int rc = 0;
+        while (rc == 0) {
+            memcpy(&(working_set), &(master_set), sizeof(master_set));
+            FD_ZERO(&(write_set));
+			for (std::vector<int>::iterator it = _ready.begin() ; it != _ready.end() ; it++)
+				FD_SET(*it, &write_set);
+            //std::cout << "before select " << _ready.size() << _sockets.size() << "\n";
+            std::cout << "\rWaiting on select()" << dot[n++] << std::flush;
+            if (n == 3)
+                n = 0;
+            rc = select(max_sd + 1, &(working_set), &(write_set), NULL, &(timeout));
+
+            //check_descriptors(rc, end_server, close_conn);
+
+        }
+
+        if (rc > 0)
+            check_descriptors2(rc, close_conn, _ready);
+            //check_descriptors2(rc, close_conn, _ready, _sockets);
 
         if (rc < 0) {
             perror("  select() failed");
@@ -145,7 +189,6 @@ void    Webserver::start()
 void    Webserver::check_descriptors(int desc_ready,
     int& end_server, int& close_conn)
 {
-
     for (int i=0; i <= max_sd  &&  desc_ready > 0; ++i)
       {
          if (FD_ISSET(i, &(working_set)))
@@ -174,12 +217,253 @@ void    Webserver::check_descriptors(int desc_ready,
                         max_sd -= 1;
                   }
                }
-            } /* End of existing connection is readable */
-         } /* End of if (FD_ISSET(i, &working_set)) */
-      } /* End of loop through selectable descriptors */
+            } 
+         } 
+      }
 }
 
-void    Webserver::accept_connections(int& end_server)
+void    Webserver::check_descriptors2(int desc_ready,
+   int& close_conn, std::vector<int>& _ready)//, std::vector<int>& _sockets)
+{
+    int ret = desc_ready;
+    for (std::vector<int>::iterator it = _ready.begin() ; ret && it != _ready.end() ; it++)
+	{
+		if (FD_ISSET(*it, &write_set))
+		{
+			int	ret = send_data(*it, close_conn);//_sockets[*it]->send(*it);
+
+			if (ret == 0)
+				_ready.erase(it);
+			else if (ret == -1 || close_conn)
+			{
+                close(*it);
+				FD_CLR(*it, &master_set);
+				FD_CLR(*it, &working_set);
+					//_sockets.erase(*it);
+				_ready.erase(it);
+                requests.erase(*it);
+                //_sockets.erase(it);
+			}
+            ret = 0;
+			break;
+		}
+	}
+
+    /*for (std::vector<int>::iterator it = _sockets.begin() ; ret && it != _sockets.end() ; it++)
+	{
+		if (FD_ISSET(*it, &write_set))
+		{
+			std::cout << "  Descriptor " << *it << " is readable\n";
+            close_conn = FALSE;
+               
+            ret = receive_data2(*it, close_conn, _ready);
+            if (ret == 0)
+            {
+                close_conn = TRUE;
+                break;
+            }
+            if (ret == -1)
+            {
+                FD_CLR(*it, &master_set);
+				FD_CLR(*it, &working_set);
+                _sockets.erase(it);
+                it = _sockets.begin();*/
+                /*close(i);
+                FD_CLR(i, &(master_set));
+                if (i == max_sd)
+                {
+                    while (FD_ISSET(max_sd, &(master_set)) == FALSE)
+                        max_sd -= 1;
+                }*/
+            /*}
+            ret = 0;
+			break;
+		}
+	}
+
+    for (int i=0; i <= max_sd  &&  ret; ++i)
+    {
+        if (FD_ISSET(i, &(working_set)))
+        {
+            desc_ready -= 1;
+
+            if (i == listen_sd)
+            {
+               std::cout << "  Listening socket is readable\n";
+               accept_connections2(_sockets);
+            }
+
+        }
+    }*/
+    
+    for (int i=0; i <= max_sd  &&  ret; ++i)
+    {
+        if (FD_ISSET(i, &(working_set)))
+        {
+            desc_ready -= 1;
+
+            if (i == listen_sd)
+            {
+               std::cout << "  Listening socket is readable\n";
+               accept_connections2();
+            }
+            else
+            {
+               std::cout << "  Descriptor " << i << " is readable\n";
+               close_conn = FALSE;
+               
+               ret = receive_data2(i, close_conn, _ready);
+               if (ret == 0)
+               {
+                    close_conn = TRUE;
+                    break;
+               }
+            }
+            if (ret == -1)
+            {
+                FD_CLR(i, &master_set);
+				FD_CLR(i, &working_set);
+                /*close(i);
+                FD_CLR(i, &(master_set));
+                if (i == max_sd)
+                {
+                    while (FD_ISSET(max_sd, &(master_set)) == FALSE)
+                        max_sd -= 1;
+                }*/
+            }
+            ret = 0;
+			break;
+        } 
+    }
+
+    /*for (int i=0; i <= max_sd  &&  ret; ++i)//desc_ready > 0; ++i)
+    {
+         if (FD_ISSET(i, &(working_set)))
+         {
+            //desc_ready -= 1;
+
+            if (i != listen_sd)
+            {
+               std::cout << "  Descriptor " << i << " is readable\n";
+               close_conn = FALSE;
+               
+               ret = receive_data2(i, close_conn, _ready);
+
+               if (close_conn)
+               {
+                  close(i);
+                  FD_CLR(i, &(master_set));
+                  if (i == max_sd)
+                  {
+                     while (FD_ISSET(max_sd, &(master_set)) == FALSE)
+                        max_sd -= 1;
+                  }
+               }
+            }
+        }
+    }
+    for (int i=0; i <= max_sd  &&  desc_ready > 0; ++i)
+    {
+         if (FD_ISSET(i, &(working_set)))
+         {
+            desc_ready -= 1;
+
+            if (i == listen_sd)
+            {
+               std::cout << "  Listening socket is readable\n";
+               accept_connections2();
+            }
+        }
+    }*/
+    
+      /*for (std::vector<int>::iterator it = _ready.begin() ; ret && it != _ready.end() ; it++)
+		{
+			if (FD_ISSET(*it, &writing_set))
+			{
+				long	ret = _sockets[*it]->send(*it);
+
+				if (ret == 0)
+					_ready.erase(it);
+				else if (ret == -1)
+				{
+					FD_CLR(*it, &_fd_set);
+					FD_CLR(*it, &reading_set);
+					_sockets.erase(*it);
+					_ready.erase(it);
+				}
+
+				ret = 0;
+				break;
+			}
+		}
+
+			//if (ret)
+			//	std::cout << "\rReceived a connection !   " << std::flush;
+
+		for (std::vector<int>::iterator it = _sockets.begin() ; ret && it != _sockets.end() ; it++)
+		{
+			//long	socket = it->first;
+            int socket = *it;
+
+			if (FD_ISSET(socket, &reading_set))
+			{
+				long	ret = it->second->recv(socket);
+
+				if (ret == 0)
+				{
+					it->second->process(socket, _config);
+					_ready.push_back(socket);
+				}
+				else if (ret == -1)
+				{
+					FD_CLR(socket, &_fd_set);
+					FD_CLR(socket, &reading_set);
+					_sockets.erase(socket);
+					it = _sockets.begin();
+				}
+				ret = 0;
+				break;
+			}
+		}*/
+
+        //if (FD_ISSET(fd, &reading_set))
+		//{
+			//long	socket = it->second.accept();
+            //this->accept_connections();
+
+			/*if (socket != -1)
+			{
+				FD_SET(socket, &_fd_set);
+				_sockets.insert(std::make_pair(socket, &(it->second)));
+				if (socket > _max_fd)
+					_max_fd = socket;
+			}
+			ret = 0;
+			break;*/
+		//}
+
+		/*for (std::map<long, Server>::iterator it = _servers.begin() ; ret && it != _servers.end() ; it++)
+		{
+			long	fd = it->first;
+
+			if (FD_ISSET(fd, &reading_set))
+			{
+				long	socket = it->second.accept();
+
+				if (socket != -1)
+				{
+					FD_SET(socket, &_fd_set);
+					_sockets.insert(std::make_pair(socket, &(it->second)));
+					if (socket > _max_fd)
+						_max_fd = socket;
+				}
+				ret = 0;
+				break;
+			}
+		}*/
+}
+
+void    Webserver::accept_connections2()//std::vector<int>& _sockets)
 {
     int new_sd = 0;
     while (new_sd != -1)
@@ -187,18 +471,91 @@ void    Webserver::accept_connections(int& end_server)
         new_sd = accept(listen_sd, NULL, NULL);
         if (new_sd < 0)
         {
-            if (errno != EWOULDBLOCK)
+            /*if (errno != EWOULDBLOCK)
             {
                 perror("  accept() failed");
                 end_server = TRUE;
             }
+            break;*/
             break;
+            //return ;
+        }
+        std::cout << "  New incoming connection - " << new_sd << "\n";
+        FD_SET(new_sd, &(master_set));
+        if (new_sd > max_sd)
+            max_sd = new_sd;
+        //_sockets.push_back(new_sd);
+    }
+}
+
+void    Webserver::accept_connections(int& end_server)
+{
+    (void)end_server;
+    int new_sd = 0;
+    while (new_sd != -1)
+    {
+        new_sd = accept(listen_sd, NULL, NULL);
+        if (new_sd < 0)
+        {
+            /*if (errno != EWOULDBLOCK)
+            {
+                perror("  accept() failed");
+                end_server = TRUE;
+            }
+            break;*/
+            break;
+            //return ;
         }
         std::cout << "  New incoming connection - " << new_sd << "\n";
         FD_SET(new_sd, &(master_set));
         if (new_sd > max_sd)
             max_sd = new_sd;
     }
+}
+
+int   Webserver::receive_data2(int i, int& close_conn, std::vector<int>& _ready)
+{
+    Request request;
+    std::vector<char> buffer(5000);
+    int rc;
+
+    if (requests.find(i) == requests.end())
+        requests.insert(std::make_pair(i, request));
+	rc = recv(i, buffer.data(), buffer.size(), 0);
+    //std::cout << "rc: " << rc << "\n";
+    //std::cout << "bdata: " << buffer.data() << "\n";
+    if (rc > 0)
+    {
+        requests[i].parseRequest(buffer.data());
+        requests[i].show();
+        _ready.push_back(i);
+        close_conn = TRUE;
+    }
+
+    /*else if (rc < 0)
+    {
+        if (errno != EWOULDBLOCK)
+        {
+            perror("  recv() failed");
+            close_conn = TRUE;
+        }
+        close_conn = TRUE;
+    }*/
+    return rc;
+}
+
+int    Webserver::send_data(int i, int& close_conn)
+{
+    int rc = 0;
+    Response response(*cs, requests[i]);
+    rc = send(i, response.GetResponseMsg().c_str(), response.GetResponseMsg().size(), 0);
+    if (rc < 0 || (requests[i].getHeaders().count("Connection") && requests[i].getHeader("Connection") != "keep-alive"))
+    {
+        perror("  send() failed");
+        close_conn = TRUE;
+    }
+    requests.erase(i);
+    return rc;
 }
 
 void    Webserver::receive_data(int i, int& close_conn)

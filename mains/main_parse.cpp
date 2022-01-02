@@ -167,15 +167,16 @@ int    main()
             std::cout << (*bg).getBufferSize("localhost:8000", "/some/path") << "\n";
             std::cout << (*bg).getBufferSize("localhost:8000", "/") << "\n";
             std::cout << "________END OF TEST______\n";*/
-            /*std::cout << "GET ALLOW_METHODS TEST. \n";
-            print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/put_test/test"));
+            std::cout << "GET ALLOW_METHODS TEST. \n";
+            /*print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/put_test/test"));
              print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/post_body/test"));
              print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/directory/test"));
              print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/404.css"));
              print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/some/path"));
-             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/"));
-            std::cout << "________END OF TEST______\n";*/
-            std::cout << "GET CGIPATH TEST. \n";
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/"));*/
+             print_allow_meths((*bg).getAllowMethodsForUrl("localhost:8000", "/main_fur"));
+            std::cout << "________END OF TEST______\n";
+            /*std::cout << "GET CGIPATH TEST. \n";
             std::cout << (*bg).getCGIPath("localhost:8000", "/put_test/test")  << "\n";
             std::cout << (*bg).getCGIPath("localhost:8000", "/post_body/test")  << "\n";
             std::cout << (*bg).getCGIPath("localhost:8000", "/directory/test/some.txt")  << "\n";
@@ -183,7 +184,7 @@ int    main()
             std::cout << (*bg).getCGIPath("localhost:8000", "/some/path")  << "\n";
             std::cout << (*bg).getCGIPath("localhost:8000", "/")  << "\n";
             std::cout << (*bg).getCGIPath("localhost:8000", "/mycgitotest")  << "\n";
-            std::cout << "________END OF TEST______\n";
+            std::cout << "________END OF TEST______\n";*/
             ++bg;
         }
         

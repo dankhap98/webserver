@@ -11,7 +11,8 @@ typedef struct s_server_item
 void    *start_server(void *args)
 {
     t_server_item *si = (t_server_item *)args;
-    si->wb->start();
+    si->wb->start2();
+    //si->wb->start2();
     return (0);
 }
 

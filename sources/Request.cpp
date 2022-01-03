@@ -100,7 +100,6 @@ void    Request::show() //temporary func
 
 void    Request::parseChunk(std::string request, bool is_first)
 {
-    //std::string	head = request.substr(0, request.find("\r\n\r\n"));
     std::string	chunks = "";
     std::cout << request.find("\r\n\r\n") << "\n";
     std::cout << request.size() << "\n";
@@ -110,37 +109,24 @@ void    Request::parseChunk(std::string request, bool is_first)
     else
         chunks = request.substr(0, request.size() -1);
     this->_body = "";
-	//std::string	subchunk = chunks.substr(0, 100);
-	//std::string	body = "";
-	//int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+
 	pos = 0;
     int     start = 0;
     int     len = 0;
 
-    //std::cout << "PROCCESS CHUNK\n";
-    //std::cout << chunks << "\n";
 	while (true)
 	{
 		pos = chunks.find("\n", start);
         if (pos == -1)
             return ;
-        //std::cout << pos << " " << chunks.substr(start, pos - start) << "\n";
         len = std::atoi(chunks.substr(start, pos - start).c_str());
-        //std::cout << "len: " << len << "\n";
         if (len == 0)
             return ;
 		this->_body += chunks.substr(pos + 1, len);
-        //pos++;
         start = pos + 2 + len;
         if (start >= (int)chunks.size())
             return ;
-        //std::cout << this->_body << "\n";
-		//i += chunksize + 2;
-		//subchunk = chunks.substr(i, 100);
-		//chunksize = strtol(subchunk.c_str(), NULL, 16);
 	}
-
-	//request = head + "\r\n\r\n" + body + "\r\n\r\n";
 }
 
 void    Request::parseRequest(std::string request)

@@ -81,7 +81,6 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
     }
 	t_server_config conf = config.getConfigByName(request.getHeader("Host"));
 	std::string host = request.getHeader("Host");
-	//std::cout << Path << "\n";
 	if (!(redirect))
 	{
 		if ((int)request.getBody().size() > std::atoi(config.getBufferSize(request.getHeader(host), request.getUrl()).c_str()))
@@ -97,9 +96,6 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 				POSTResponse(request, config);
 			else if (request.getMethod() == "DELETE")
 				DELETEResponse();
-			//}
-			//else
-			//	ResponseMsg = response_405(config, host);
 		}
 		else if (file_exist(Path) == 2){
 			if (config.getAutoIndex(host, request.getUrl()))
@@ -134,7 +130,6 @@ void            Response::POSTResponse(Request  &request, ConfigServer& config)
 					std::to_string(Html_text.size()) + "\n\n" + Html_text;
 	}
 	else if ((config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
-//	else
 	{
 		CGIClass cgi(request);
 		Html_text = cgi.startCGI(request);

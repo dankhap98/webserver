@@ -14,6 +14,7 @@ class Request
        std::string  _body;
        std::string  Query;
 	   std::string	params_row;
+       size_t   req_size;
 
     public:
         Request();
@@ -37,6 +38,7 @@ class Request
         void    show();
         std::map<std::string, std::string>    getHeaders();
         std::string    getHeader(std::string name);
+        size_t          size() const;
 };
 
 #endif

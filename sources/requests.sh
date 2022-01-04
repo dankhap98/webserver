@@ -18,7 +18,7 @@ Accept-Language: en-US
 Connection: Keep-Alive" "http://localhost:8000/delfile"
 
 #Chunks
-curl -X POST -H "User-Agent: custom-client
+curl -X GET -H "User-Agent: custom-client
 Host: mdeep
 Accept-Language: fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5
 Connection: Keep-Alive

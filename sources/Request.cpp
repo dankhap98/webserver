@@ -1,6 +1,6 @@
 #include "../includes/Request.hpp"
 
-Request::Request(): _method(), _headers(), _params(), _body() {}
+Request::Request(): _method(), _headers(), _params(), _body(), req_size(0) {}
 
 Request::~Request() {}
 
@@ -102,8 +102,8 @@ void    Request::parseChunk(std::string request, bool is_first)
 {
     //std::string	head = request.substr(0, request.find("\r\n\r\n"));
     std::string	chunks = "";
-    std::cout << request.find("\r\n\r\n") << "\n";
-    std::cout << request.size() << "\n";
+    //std::cout << request.find("\r\n\r\n") << "\n";
+    //std::cout << request.size() << "\n";
     int pos = request.find("\r\n\r\n") + 4;
     if (is_first)
 	    chunks = request.substr(pos, request.size() - pos);
@@ -143,6 +143,11 @@ void    Request::parseChunk(std::string request, bool is_first)
 	//request = head + "\r\n\r\n" + body + "\r\n\r\n";
 }
 
+size_t  Request::size() const
+{
+    return this->req_size;
+}
+
 void    Request::parseRequest(std::string request)
 {
     int start = 0;
@@ -150,6 +155,19 @@ void    Request::parseRequest(std::string request)
     int npos = 0;
     bool    first = true;
 
+    /*if (request.find("HTTP/1.1") != std::string::npos)
+    {
+        this->_method.clear();
+        this->_url.clear();
+        this->_status.clear();
+        this->_headers.clear();
+        this->_params.clear();
+        this->_body.clear();
+        this->Query.clear();
+        this->params_row.clear();
+        this->req_size = 0;
+    }*/
+    this->req_size+=request.size();
     if (getMethod().size() == 0)
     {
         npos = request.find_first_of("\n", start);

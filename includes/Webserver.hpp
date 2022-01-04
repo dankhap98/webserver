@@ -24,7 +24,11 @@ class Webserver
         fd_set  master_set;
         fd_set  working_set;
         ConfigServer    *cs;
+        //std::map<int, Request> requests;
         std::map<int, Request> requests;
+        //std::map<int, std::string> requests;
+        std::map<int, std::string> responses;
+        //std::map<int, std::string> responses;
 
         Webserver(const Webserver& w);
         Webserver();
@@ -47,6 +51,7 @@ class Webserver
         Webserver(ConfigServer& cs);
         //Webserver(int port);
         ~Webserver();
+
 
         void    start();
 

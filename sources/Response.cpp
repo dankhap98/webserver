@@ -88,7 +88,7 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 			ResponseMsg = BodiLimit();
 		else if (config.getAllowMethodsForUrl(host,request.getUrl()).size() > 0 &&
 			!find_str_in_vector(config.getAllowMethodsForUrl(host,request.getUrl()),request.getMethod()))
-			ResponseMsg = response_405(config, host);
+			ResponseMsg = response_405(config.getAllowMethodsForUrl(host,request.getUrl()));
 		else if (file_exist(Path) == 1)
 		{
 			if (request.getMethod() == "GET" && request.getParams().empty())
@@ -157,7 +157,7 @@ void            Response::GETResponse()
     SetContentType();
     Html_text = readHtml(Path);
     if (!(content_type.empty()) && content_type != "no type")
-        ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " +
+        ResponseMsg = "HTTP/1.1 200 OK\nContent-Type: " + content_type + "\nContent-Length:  " + 
                       std::to_string(Html_text.size()) + "\n\n" + Html_text;
     else if (!(open_err))
         ResponseMsg = "HTTP/1.1 403 Forbidden\nContent-Type: " + content_type + "\nContent-Length:  " +
@@ -240,13 +240,13 @@ void 			Response::setPostBody(Request &request)
 	postFileData = body.substr(start, size - start - 2);
 }
 
-std::string		Response::response_405(ConfigServer& config, std::string host)
+std::string		Response::response_405(std::vector<std::string> allow_m)//ConfigServer& config, std::vector<std::string>& allow_m)
 {
 	std::string str = "HTTP/1.1 405 Method Not Allowed\nContent-Type: Method Not Allowed\nContent-Length:  ";
 	std::string body = error_405;
-	int i = config.getAllowMethodsForUrl(host, Path).size();
+	int i = allow_m.size();//config.getAllowMethodsForUrl(host, ).size();
 	while (i > 0)
-		body += config.getAllowMethodsForUrl(host, Path)[--i] + " ";
+		body += allow_m[--i] + " ";//config.getAllowMethodsForUrl(host, Path)[--i] + " ";
 	body += error_405p2;
 	str += std::to_string(body.size()) + "\n\n" + body;
 	return str;

@@ -35,7 +35,7 @@ private:
 	void 			fileacceptance(Request &request);
 	void			setErrorpages(t_server_config &conf);
 
-	std::string		response_405(ConfigServer& config, std::string host);//It's ok? by ncammy
+	std::string		response_405(std::vector<std::string> allow_m);//ConfigServer& config, std::string host);//It's ok? by ncammy
 
     std::string     ResponseMsg;
     std::string     Html_text;

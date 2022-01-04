@@ -195,6 +195,8 @@ void            Response::SetContentType()
         content_type = "video/mp4";
     else if (type == "jpeg" || type == "jpg")
         content_type = "image/jpeg";
+	else if (type == ".png" || type == "png")
+		content_type = "image/png";
     else
         content_type = "no type";
 }

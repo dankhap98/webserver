@@ -37,12 +37,7 @@ class ConfigServer
 
         ConfigServer(const ConfigServer& cs);
         ConfigServer & operator=(const ConfigServer& cs);
-        //props_type getProps();
         void     setProperty(std::string name, std::string value);
-        /*std::string     getProperty(std::string name);
-        loc_type getLocations();
-        error_page_type getErrorPages();
-        std::vector<std::string>    getAllowMethods();*/
         void     setLocation(ConfigLocation cl);
         void     setAddress(std::string addr);
         void     setPort(int server_port);

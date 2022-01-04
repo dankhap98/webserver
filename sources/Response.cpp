@@ -81,7 +81,6 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
     }
 	t_server_config conf = config.getConfigByName(request.getHeader("Host"));
 	std::string host = request.getHeader("Host");
-	//std::cout << Path << "\n";
 	if (!(redirect))
 	{
 		if ((int)request.getBody().size() > std::atoi(config.getBufferSize(request.getHeader(host), request.getUrl()).c_str()))
@@ -97,9 +96,6 @@ void            Response::SetResponseMsg(Request &request, ConfigServer& config)
 				POSTResponse(request, config);
 			else if (request.getMethod() == "DELETE")
 				DELETEResponse();
-			//}
-			//else
-			//	ResponseMsg = response_405(config, host);
 		}
 		else if (file_exist(Path) == 2){
 			if (config.getAutoIndex(host, request.getUrl()))
@@ -133,8 +129,7 @@ void            Response::POSTResponse(Request  &request, ConfigServer& config)
 			ResponseMsg = "HTTP/1.1 201 Created\nContent-Type: " + content_type + "\nContent-Length:  " +
 					std::to_string(Html_text.size()) + "\n\n" + Html_text;
 	}
-//	else if (!(config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
-	else
+	else if ((config.getCGIPath(request.getHeader("Host"), request.getUrl()).empty()))
 	{
 		CGIClass cgi(request);
 		Html_text = cgi.startCGI(request);
@@ -200,6 +195,8 @@ void            Response::SetContentType()
         content_type = "video/mp4";
     else if (type == "jpeg" || type == "jpg")
         content_type = "image/jpeg";
+	else if (type == ".png" || type == "png")
+		content_type = "image/png";
     else
         content_type = "no type";
 }
@@ -240,13 +237,13 @@ void 			Response::setPostBody(Request &request)
 	postFileData = body.substr(start, size - start - 2);
 }
 
-std::string		Response::response_405(std::vector<std::string> allow_m)//ConfigServer& config, std::vector<std::string>& allow_m)
+std::string		Response::response_405(std::vector<std::string> allow_m)
 {
 	std::string str = "HTTP/1.1 405 Method Not Allowed\nContent-Type: Method Not Allowed\nContent-Length:  ";
 	std::string body = error_405;
-	int i = allow_m.size();//config.getAllowMethodsForUrl(host, ).size();
+	int i = allow_m.size();
 	while (i > 0)
-		body += allow_m[--i] + " ";//config.getAllowMethodsForUrl(host, Path)[--i] + " ";
+		body += allow_m[--i] + " ";
 	body += error_405p2;
 	str += std::to_string(body.size()) + "\n\n" + body;
 	return str;

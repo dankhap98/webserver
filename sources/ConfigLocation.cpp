@@ -102,7 +102,6 @@ ConfigLocation  ConfigLocation::getConfigSubLocationByUrl(std::string url)
                 return (*bg);
             if (loc_url[0] == '*')
             {
-                //TD not 0 index, must be i - index
                 loc_url = loc_url.substr(1, loc_url.size() - 1);
                 if (std::count(suburl.begin(), suburl.end(), '/') == 1)
                 {
@@ -114,5 +113,5 @@ ConfigLocation  ConfigLocation::getConfigSubLocationByUrl(std::string url)
             ++bg;
         }
     }
-    return  ConfigLocation(); //to think
+    return  ConfigLocation();
 }

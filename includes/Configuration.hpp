@@ -89,8 +89,6 @@ class Configuration
         ConfigLocation    loadLocationConfig(std::ifstream& ifs);
 
         bool    valid_file_name();
-        //bool    valid_ip(std::string ip);
-        //bool    valid_port(std::string port);
         void    trim_line(std::string& line);
         void    parse_words(std::string line, std::vector<std::string>& words);
         void    parseServerAddress(ConfigServer *cs);
@@ -110,25 +108,6 @@ class Configuration
         bool    valid_ip(std::string ip);
         bool    valid_port(std::string port);
         bool    valid_size(std::string lim_size);
-
-        //t_misconfiguration misconfig;
-        /*class NoFileOpenException: public std::exception
-        {
-            public:
-                virtual const   char* what() const throw()
-                {
-                    return  ("Unable to open config file!");
-                }
-        };
-
-        class InvalidFileNameException: public std::exception
-        {
-            public:
-                virtual const   char* what() const throw()
-                {
-                    return  ("Invalid file name!");
-                }
-        };*/
 
         std::vector<ConfigServer>   getServers();
 };

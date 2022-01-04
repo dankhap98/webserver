@@ -13,10 +13,6 @@ std::string	Request::getParamsRaw() const
 	return this->params_row;
 }
 
-//std::map<std::string, std::string> Request::getHeader() const{
-//    return this->_headers;
-//}
-
 std::string Request::getBody() const
 {
     return this->_body;
@@ -100,47 +96,31 @@ void    Request::show() //temporary func
 
 void    Request::parseChunk(std::string request, bool is_first)
 {
-    //std::string	head = request.substr(0, request.find("\r\n\r\n"));
     std::string	chunks = "";
-    //std::cout << request.find("\r\n\r\n") << "\n";
-    //std::cout << request.size() << "\n";
     int pos = request.find("\r\n\r\n") + 4;
     if (is_first)
 	    chunks = request.substr(pos, request.size() - pos);
     else
         chunks = request.substr(0, request.size() -1);
     this->_body = "";
-	//std::string	subchunk = chunks.substr(0, 100);
-	//std::string	body = "";
-	//int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+
 	pos = 0;
     int     start = 0;
     int     len = 0;
 
-    //std::cout << "PROCCESS CHUNK\n";
-    //std::cout << chunks << "\n";
 	while (true)
 	{
 		pos = chunks.find("\n", start);
         if (pos == -1)
             return ;
-        //std::cout << pos << " " << chunks.substr(start, pos - start) << "\n";
         len = std::atoi(chunks.substr(start, pos - start).c_str());
-        //std::cout << "len: " << len << "\n";
         if (len == 0)
             return ;
 		this->_body += chunks.substr(pos + 1, len);
-        //pos++;
         start = pos + 2 + len;
         if (start >= (int)chunks.size())
             return ;
-        //std::cout << this->_body << "\n";
-		//i += chunksize + 2;
-		//subchunk = chunks.substr(i, 100);
-		//chunksize = strtol(subchunk.c_str(), NULL, 16);
 	}
-
-	//request = head + "\r\n\r\n" + body + "\r\n\r\n";
 }
 
 size_t  Request::size() const
@@ -155,18 +135,6 @@ void    Request::parseRequest(std::string request)
     int npos = 0;
     bool    first = true;
 
-    /*if (request.find("HTTP/1.1") != std::string::npos)
-    {
-        this->_method.clear();
-        this->_url.clear();
-        this->_status.clear();
-        this->_headers.clear();
-        this->_params.clear();
-        this->_body.clear();
-        this->Query.clear();
-        this->params_row.clear();
-        this->req_size = 0;
-    }*/
     this->req_size+=request.size();
     if (getMethod().size() == 0)
     {

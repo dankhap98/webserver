@@ -3,6 +3,7 @@
 //
 #include "stdio.h"
 #include "string"
+#include "unistd.h"
 
 int main(void)
 {
@@ -12,5 +13,6 @@ int main(void)
 	printf("Content-Length: ");
 	printf("%lu\n\n", strlen(params.c_str()));
 	printf("%s\n\n", params.c_str());
+	sleep(1);
 	return 0;
 }
